@@ -1,22 +1,84 @@
 @import "tailwindcss";
 
-@custom-variant dark (&:where(.dark, .dark *));
-
+/* ─────────────────────────────────────────────
+   Design tokens — disamakan dengan personal-web
+   Aksen cyan #00CFFF, default dark, terang via
+   class "light" di <html>.
+   ───────────────────────────────────────────── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* ── Accent ── */
+  --accent: #00cfff;
+  --accent-hover: rgba(0, 207, 255, 0.15);
+  --accent-glow: rgba(0, 207, 255, 0.28);
+  --accent-muted: rgba(0, 207, 255, 0.08);
+
+  /* ── Gradient text ── */
+  --gradient-a: #00cfff;
+  --gradient-b: #7c5cff;
+
+  /* ── Dark theme (default) ── */
+  --bg-light: #121212;
+  --bg-white: #1a1a1a;
+  --fg-dark: #f5f5f5;
+  --fg-mid: #cccccc;
+  --fg-muted: #888888;
+  --bg-dark: #0d0d0d;
+  --bg-dark-surface: #161616;
+  --fg-light: #f5f5f5;
+  --fg-muted-dark: #888888;
+  --border-light: rgba(255, 255, 255, 0.08);
+  --border-dark: rgba(255, 255, 255, 0.08);
+  --border-accent: rgba(0, 207, 255, 0.35);
+
+  /* ── Aliases ala chatbot personal-web ── */
+  --blue-bg: var(--bg-light);
+  --blue-dark: var(--bg-white);
+  --blue-surface: var(--bg-white);
+  --blue: var(--accent);
+  --blue-hover: var(--accent-hover);
+  --blue-glow: var(--accent-glow);
+  --blue-muted: var(--accent-muted);
+  --blue-ice: var(--fg-dark);
+  --ice: var(--fg-dark);
+  --muted: var(--fg-muted);
+  --bg: var(--bg-dark);
+  --surface: rgba(255, 255, 255, 0.05);
+  --surface-border: var(--border-light);
+  --surface-hover: rgba(255, 255, 255, 0.09);
+  --badge-bg: rgba(255, 255, 255, 0.14);
 }
 
-.dark {
-  --background: #09090b;
-  --foreground: #fafafa;
+/* ── Light theme ── */
+.light {
+  --bg-light: #f3f6f0;
+  --bg-white: #ffffff;
+  --fg-dark: #0d0d0d;
+  --fg-mid: #2e2e2e;
+  --fg-muted: #4b5563;
+  --border-light: rgba(0, 0, 0, 0.09);
+  --border-dark: rgba(255, 255, 255, 0.09);
+
+  --blue-bg: var(--bg-light);
+  --blue-dark: var(--bg-white);
+  --blue-surface: var(--bg-white);
+  --blue-ice: var(--fg-dark);
+  --ice: var(--fg-dark);
+  --muted: var(--fg-muted);
+  --bg: var(--bg-light);
+  --surface: rgba(255, 255, 255, 0.75);
+  --surface-border: var(--border-light);
+  --surface-hover: rgba(255, 255, 255, 0.92);
+  --badge-bg: rgba(255, 255, 255, 0.85);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-poppins);
+  --font-mono: var(--font-jetbrains-mono);
+}
+
+html {
+  overscroll-behavior: none;
+  background-color: var(--bg-dark);
 }
 
 html,
@@ -25,28 +87,126 @@ body {
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  background-color: var(--bg-light);
+  color: var(--fg-dark);
+  font-family: var(--font-poppins), sans-serif;
+  margin: 0;
+  min-height: 100dvh;
 }
 
-/* Scrollbar halus untuk area chat & sidebar */
-.nice-scroll::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+::selection {
+  background: var(--accent-glow);
+  color: var(--fg-dark);
 }
-.nice-scroll::-webkit-scrollbar-track {
+
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
   background: transparent;
 }
-.nice-scroll::-webkit-scrollbar-thumb {
-  background: rgb(161 161 170 / 0.35);
-  border-radius: 999px;
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 207, 255, 0.25);
+  border-radius: 3px;
 }
-.nice-scroll::-webkit-scrollbar-thumb:hover {
-  background: rgb(161 161 170 / 0.6);
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 207, 255, 0.45);
 }
 
-/* Animasi titik mengetik */
+*:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ── Glass / surface cards ── */
+.glass {
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+.glass-hover {
+  transition: all 0.25s ease;
+}
+.glass-hover:hover {
+  background: var(--surface-hover);
+  border-color: rgba(0, 207, 255, 0.35);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 36px rgba(0, 207, 255, 0.1);
+}
+
+/* ── Logo badge ── */
+.logo-badge {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-white);
+  color: var(--accent);
+  border: 1px solid var(--border-accent);
+  font-weight: 900;
+  font-size: 1.05rem;
+}
+
+/* ── Animated gradient heading ── */
+.text-gradient-animated {
+  background: linear-gradient(
+    90deg,
+    var(--gradient-a) 0%,
+    var(--gradient-b) 25%,
+    var(--gradient-a) 50%,
+    var(--gradient-b) 75%,
+    var(--gradient-a) 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: gradient-slide 7s linear infinite;
+}
+@keyframes gradient-slide {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* ── Tombol shine ── */
+.btn-shine {
+  position: relative;
+  overflow: hidden;
+}
+.btn-shine::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -75%;
+  width: 50%;
+  height: 100%;
+  transform: skewX(-20deg);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
+  animation: btn-shine-sweep 3.4s ease-in-out infinite;
+}
+@keyframes btn-shine-sweep {
+  0% {
+    left: -75%;
+  }
+  55% {
+    left: 125%;
+  }
+  100% {
+    left: 125%;
+  }
+}
+
+/* ── Animasi titik mengetik ── */
 @keyframes typing-bounce {
   0%,
   60%,
@@ -69,17 +229,22 @@ body {
   animation-delay: 0.3s;
 }
 
-/* Markdown di bubble AI */
+/* ── Markdown di bubble AI ── */
+.prose-ai {
+  font-size: 0.875rem;
+  line-height: 1.625;
+}
 .prose-ai pre {
-  background: rgb(0 0 0 / 0.45);
-  border: 1px solid rgb(255 255 255 / 0.1);
+  background: #0d1117;
+  border: 1px solid var(--surface-border);
   border-radius: 0.75rem;
   padding: 0.75rem 1rem;
   overflow-x: auto;
   font-size: 0.8rem;
 }
 .prose-ai code {
-  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+  color: var(--blue);
 }
 .prose-ai p {
   margin: 0.4rem 0;
@@ -95,6 +260,20 @@ body {
 .prose-ai ol {
   list-style: decimal;
 }
+.prose-ai h1,
+.prose-ai h2,
+.prose-ai h3,
+.prose-ai h4 {
+  color: var(--ice);
+  font-weight: 700;
+  margin: 0.6rem 0 0.3rem;
+}
+.prose-ai strong {
+  color: var(--ice);
+}
+.prose-ai a {
+  color: var(--blue);
+}
 .prose-ai table {
   border-collapse: collapse;
   margin: 0.6rem 0;
@@ -102,6 +281,15 @@ body {
 }
 .prose-ai th,
 .prose-ai td {
-  border: 1px solid rgb(161 161 170 / 0.35);
+  border: 1px solid var(--surface-border);
   padding: 0.35rem 0.6rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }

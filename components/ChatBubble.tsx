@@ -21,22 +21,22 @@ export default function ChatBubble({ msg }: { msg: ChatMessage }) {
   };
 
   return (
-    <div className={`flex w-full ${isUser ? "justify-end" : "justify-start"}`}>
+    <div className={`flex ${isUser ? "justify-end" : "justify-start"} mb-4`}>
       <div
-        className={`max-w-[88%] rounded-2xl px-4 py-3 text-sm leading-relaxed shadow md:max-w-[75%] ${
+        className={`max-w-[80%] rounded-2xl px-4 py-3 lg:max-w-[70%] ${
           isUser
-            ? "rounded-br-md bg-gradient-to-br from-violet-600 to-fuchsia-600 text-white shadow-fuchsia-900/30"
-            : "rounded-bl-md border border-white/10 bg-zinc-900/80 text-zinc-100 backdrop-blur"
+            ? "rounded-br-md bg-[var(--blue)] text-white"
+            : "rounded-bl-md border border-[var(--surface-border)] bg-[var(--surface)] text-[var(--ice)]"
         }`}
       >
-        {/* Gambar user: tampil di atas ketikan, sesuai request abang */}
+        {/* Gambar user: tampil di atas ketikan */}
         {msg.images && msg.images.length > 0 && (
           <div className="mb-2 grid grid-cols-2 gap-2">
             {msg.images.map((img) => (
               <button
                 key={img.id}
                 onClick={() => setZoom(img.dataUrl)}
-                className="group relative overflow-hidden rounded-xl border border-white/15"
+                className="group relative cursor-pointer overflow-hidden rounded-xl border border-black/10"
                 title="Klik untuk perbesar"
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -51,7 +51,9 @@ export default function ChatBubble({ msg }: { msg: ChatMessage }) {
         )}
 
         {isUser ? (
-          <p className="whitespace-pre-wrap">{msg.content || "(gambar tanpa teks)"}</p>
+          <p className="whitespace-pre-wrap text-sm leading-relaxed">
+            {msg.content || "(gambar tanpa teks)"}
+          </p>
         ) : (
           <div className="prose-ai">
             <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content || "…"}</ReactMarkdown>
@@ -61,7 +63,7 @@ export default function ChatBubble({ msg }: { msg: ChatMessage }) {
         {!isUser && msg.content && (
           <button
             onClick={copy}
-            className="mt-2 rounded-md border border-white/10 px-2 py-0.5 text-[11px] text-zinc-400 transition hover:bg-white/10 hover:text-white"
+            className="mt-2 cursor-pointer rounded-md border border-[var(--surface-border)] px-2 py-0.5 text-[11px] text-[var(--muted)] transition hover:bg-[var(--surface-hover)] hover:text-[var(--ice)]"
           >
             {copied ? "✅ Tersalin" : "📋 Salin"}
           </button>

@@ -42,8 +42,9 @@ export default function ChatPage() {
   // Persist otomatis
   useEffect(() => saveSettings(settings), [settings]);
   useEffect(() => saveSessions(sessions), [sessions]);
+  // Tema ala personal-web: default dark, terang via class "light" di <html>.
   useEffect(() => {
-    document.documentElement.classList.toggle("dark", settings.theme !== "light");
+    document.documentElement.classList.toggle("light", settings.theme === "light");
   }, [settings.theme]);
 
   // ID aktif efektif: pilihan user, atau sesi terbaru bila belum memilih.
@@ -268,8 +269,10 @@ export default function ChatPage() {
     }));
   };
 
+  const providerMeta = getProvider(settings.provider);
+
   return (
-    <div className="flex h-screen overflow-hidden bg-zinc-950 text-zinc-100">
+    <div className="flex h-screen overflow-hidden bg-[var(--bg)] text-[var(--ice)]">
       <Sidebar
         sessions={sessions}
         activeId={effectiveId}
@@ -286,17 +289,10 @@ export default function ChatPage() {
       <div className="flex min-w-0 flex-1 flex-col">
         <Topbar
           provider={settings.provider}
-          model={settings.model}
-          reasoning={settings.reasoning}
-          customModel={settings.provider === "custom"}
-          customModelText={settings.model}
           hasKey={!!activeKey}
           theme={settings.theme}
           streaming={streaming}
           onProvider={setProvider}
-          onModel={(m) => setSettings((s) => ({ ...s, model: m }))}
-          onCustomModelText={(v) => setSettings((s) => ({ ...s, model: v }))}
-          onReasoning={(r: ReasoningLevel) => setSettings((s) => ({ ...s, reasoning: r }))}
           onOpenKeys={() => setKeyOpen(true)}
           onToggleTheme={() =>
             setSettings((s) => ({ ...s, theme: s.theme === "dark" ? "light" : "dark" }))
@@ -305,13 +301,13 @@ export default function ChatPage() {
         />
 
         {error && (
-          <div className="border-b border-red-500/30 bg-red-500/10 px-4 py-2 text-xs text-red-200">
+          <div className="border-b border-red-400/30 bg-red-500/10 px-4 py-2 text-xs text-red-300">
             ⚠️ {error}
           </div>
         )}
 
-        <main className="nice-scroll flex-1 overflow-y-auto">
-          <div className="mx-auto flex min-h-full w-full max-w-3xl flex-col gap-4 px-3 py-5 md:px-5">
+        <main className="flex-1 overflow-y-auto overscroll-contain">
+          <div className="mx-auto flex min-h-full w-full max-w-4xl flex-col px-3 py-4 sm:px-4">
             {!active || active.messages.length === 0 ? (
               <EmptyState
                 onPick={(t) => {
@@ -330,6 +326,15 @@ export default function ChatPage() {
         <ChatInput
           streaming={streaming}
           visionOk={visionOk}
+          models={
+            settings.provider === "custom"
+              ? [{ id: settings.model, label: `${settings.model} (custom)`, vision: false, reasoning: false }]
+              : providerMeta.models
+          }
+          model={settings.model}
+          reasoning={settings.reasoning}
+          onModel={(m) => setSettings((s) => ({ ...s, model: m }))}
+          onReasoning={(r: ReasoningLevel) => setSettings((s) => ({ ...s, reasoning: r }))}
           onSend={send}
           onStop={stop}
         />

@@ -1,18 +1,25 @@
 "use client";
 
 import { useRef, useState } from "react";
-import type { ChatImage } from "@/lib/types";
+import { REASONING_META, type ModelOption } from "@/lib/providers";
+import type { ChatImage, ReasoningLevel } from "@/lib/types";
 import { uid } from "@/lib/types";
 
 interface Props {
   streaming: boolean;
   visionOk: boolean;
+  models: ModelOption[];
+  model: string;
+  reasoning: ReasoningLevel;
+  onModel: (m: string) => void;
+  onReasoning: (r: ReasoningLevel) => void;
   onSend: (text: string, images: ChatImage[]) => void;
   onStop: () => void;
 }
 
 const MAX_FILES = 4;
 const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_IMAGE_DIMENSION = 1600;
 
 function fileToDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -23,7 +30,58 @@ function fileToDataUrl(file: File): Promise<string> {
   });
 }
 
-export default function ChatInput({ streaming, visionOk, onSend, onStop }: Props) {
+/** Kompres gambar via canvas (disamakan dengan personal-web). */
+function compressImage(dataUrl: string, mime: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      try {
+        const scale = Math.min(1, MAX_IMAGE_DIMENSION / Math.max(img.width, img.height));
+        const w = Math.max(1, Math.round(img.width * scale));
+        const h = Math.max(1, Math.round(img.height * scale));
+        const canvas = document.createElement("canvas");
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return reject(new Error("Canvas tidak tersedia."));
+        ctx.drawImage(img, 0, 0, w, h);
+
+        if (mime === "image/png" || mime === "image/webp") {
+          const pixels = ctx.getImageData(0, 0, w, h).data;
+          for (let i = 3; i < pixels.length; i += 4) {
+            if (pixels[i] < 255) {
+              ctx.fillStyle = "#ffffff";
+              ctx.fillRect(0, 0, w, h);
+              ctx.drawImage(img, 0, 0, w, h);
+              break;
+            }
+          }
+        }
+
+        const out = canvas.toDataURL("image/jpeg", 0.85);
+        resolve(out.length < dataUrl.length ? out : dataUrl);
+      } catch (err) {
+        reject(err);
+      }
+    };
+    img.onerror = () => reject(new Error("Gagal memproses gambar."));
+    img.src = dataUrl;
+  });
+}
+
+const LEVELS: ReasoningLevel[] = ["fast", "medium", "high"];
+
+export default function ChatInput({
+  streaming,
+  visionOk,
+  models,
+  model,
+  reasoning,
+  onModel,
+  onReasoning,
+  onSend,
+  onStop,
+}: Props) {
   const [text, setText] = useState("");
   const [images, setImages] = useState<ChatImage[]>([]);
   const [warn, setWarn] = useState("");
@@ -47,7 +105,8 @@ export default function ChatInput({ streaming, visionOk, onSend, onStop }: Props
         setWarn(`"${f.name}" > 5MB, dilewati.`);
         continue;
       }
-      const dataUrl = await fileToDataUrl(f);
+      const raw = await fileToDataUrl(f);
+      const dataUrl = await compressImage(raw, f.type).catch(() => raw);
       next.push({ id: uid("img"), dataUrl, name: f.name });
     }
     setImages(next);
@@ -63,41 +122,84 @@ export default function ChatInput({ streaming, visionOk, onSend, onStop }: Props
     requestAnimationFrame(() => areaRef.current?.focus());
   };
 
+  const currentLabel = models.find((m) => m.id === model)?.label ?? model;
+
   return (
-    <div className="border-t border-white/10 bg-zinc-950/80 px-3 pb-3 pt-2 backdrop-blur md:px-5 md:pb-5">
-      <div className="mx-auto max-w-3xl">
-        {!visionOk && (
-          <p className="mb-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-1.5 text-[11px] text-amber-200">
-            ⚠️ Model ini kemungkinan tidak support gambar. Pakai GPT-4o / Gemini Flash untuk vision.
-          </p>
-        )}
+    <div className="sticky bottom-0 shrink-0 border-t border-[var(--surface-border)] bg-[var(--bg)]">
+      <div className="mx-auto w-full max-w-4xl px-3 sm:px-4">
+        {/* Dropdown model — ala personal-web */}
+        <div className="py-2">
+          <select
+            value={models.some((m) => m.id === model) ? model : ""}
+            onChange={(e) => onModel(e.target.value)}
+            className="w-full cursor-pointer truncate rounded-lg border border-[var(--surface-border)] bg-[var(--surface)] px-3 py-1.5 text-xs text-[var(--muted)] outline-none transition-colors hover:border-[var(--blue)] hover:text-[var(--ice)] sm:text-sm"
+            title={currentLabel}
+          >
+            {!models.some((m) => m.id === model) && (
+              <option value="">{currentLabel} (custom)</option>
+            )}
+            {models.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.label}
+                {model === m.id ? " ✓" : ""}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Pill reasoning Fast/Medium/High */}
+        <div className="flex flex-wrap items-center gap-1.5 pb-1 text-xs text-[var(--muted)]">
+          {LEVELS.map((lv) => {
+            const active = reasoning === lv;
+            return (
+              <button
+                key={lv}
+                onClick={() => onReasoning(lv)}
+                title={REASONING_META[lv].desc}
+                className={`cursor-pointer rounded-full border px-2.5 py-1 font-medium transition-colors ${
+                  active
+                    ? "border-[var(--blue)] bg-[var(--blue)] text-white"
+                    : "border-[var(--surface-border)] bg-[var(--surface)] hover:border-[var(--blue)] hover:text-[var(--ice)]"
+                }`}
+              >
+                {REASONING_META[lv].icon} {REASONING_META[lv].label}
+              </button>
+            );
+          })}
+          {!visionOk && (
+            <span className="text-[11px] text-yellow-500">
+              ⚠️ Model ini kemungkinan tidak support gambar.
+            </span>
+          )}
+        </div>
 
         {/* Preview gambar sebelum dikirim */}
         {images.length > 0 && (
-          <div className="mb-2 flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2 pb-2">
             {images.map((img) => (
-              <div key={img.id} className="relative">
+              <div key={img.id} className="relative inline-block">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={img.dataUrl}
                   alt={img.name}
-                  className="h-16 w-16 rounded-lg border border-white/15 object-cover"
+                  className="h-20 w-20 rounded-lg border border-[var(--surface-border)] object-cover"
                 />
                 <button
                   onClick={() => setImages(images.filter((i) => i.id !== img.id))}
-                  className="absolute -right-1.5 -top-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] text-white shadow hover:bg-red-400"
+                  className="absolute -right-2 -top-2 flex h-5 w-5 cursor-pointer items-center justify-center rounded-full bg-red-500 text-xs text-white transition-colors hover:bg-red-600"
                   title="Hapus gambar"
                 >
-                  ✕
+                  ×
                 </button>
               </div>
             ))}
           </div>
         )}
 
-        {warn && <p className="mb-1.5 text-[11px] text-red-300">{warn}</p>}
+        {warn && <p className="pb-1 text-[11px] text-red-400">{warn}</p>}
 
-        <div className="flex items-end gap-2 rounded-2xl border border-white/10 bg-zinc-900/90 p-2 shadow-xl focus-within:border-fuchsia-500/60">
+        {/* Bar input — ala personal-web */}
+        <div className="flex items-center gap-1.5 py-2 sm:gap-2 sm:py-3">
           <input
             ref={fileRef}
             type="file"
@@ -105,14 +207,15 @@ export default function ChatInput({ streaming, visionOk, onSend, onStop }: Props
             multiple
             className="hidden"
             onChange={(e) => {
-              pick(e.target.files);
+              void pick(e.target.files);
               e.target.value = "";
             }}
           />
           <button
             onClick={() => fileRef.current?.click()}
-            className="rounded-xl px-2.5 py-2 text-lg text-zinc-300 transition hover:bg-white/10 hover:text-white"
-            title="Tambah gambar (max 4, @5MB)"
+            disabled={streaming}
+            className="shrink-0 cursor-pointer rounded-xl border border-[var(--surface-border)] bg-[var(--surface)] px-2.5 py-2 text-sm font-medium text-[var(--muted)] transition-colors hover:border-[var(--blue)] hover:text-[var(--ice)] disabled:opacity-30 sm:px-3"
+            title="Upload gambar (max 4, @5MB)"
           >
             📎
           </button>
@@ -127,30 +230,38 @@ export default function ChatInput({ streaming, visionOk, onSend, onStop }: Props
               }
             }}
             rows={1}
-            placeholder="Ketik pesan… (Enter kirim, Shift+Enter baris baru)"
-            className="max-h-36 min-h-10 flex-1 resize-none bg-transparent px-1 py-2 text-sm text-zinc-100 outline-none placeholder:text-zinc-500"
+            placeholder="Ketik pesan..."
+            autoCorrect="off"
+            autoComplete="off"
+            spellCheck="false"
+            className="min-w-0 flex-1 resize-none rounded-xl border border-[var(--surface-border)] bg-[var(--surface)] px-3 py-2.5 text-base text-[var(--ice)] outline-none transition-colors placeholder:text-[var(--muted)] focus:border-[var(--blue)] disabled:opacity-50 sm:px-4 sm:text-sm"
           />
           {streaming ? (
             <button
               onClick={onStop}
-              className="rounded-xl bg-red-500/90 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-400"
+              className="shrink-0 cursor-pointer rounded-xl bg-red-500 p-2.5 text-white transition-opacity hover:opacity-90"
               title="Hentikan jawaban"
+              aria-label="Hentikan jawaban"
             >
-              ⏹ Stop
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                <rect x="6" y="6" width="12" height="12" rx="2" />
+              </svg>
             </button>
           ) : (
             <button
               onClick={send}
               disabled={!text.trim() && images.length === 0}
-              className="rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-fuchsia-600/25 transition hover:brightness-110 active:scale-95 disabled:opacity-40"
+              className="shrink-0 cursor-pointer rounded-xl bg-[var(--blue)] p-2.5 text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-30"
+              title="Kirim"
+              aria-label="Kirim pesan"
             >
-              Kirim ➤
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="22" y1="2" x2="11" y2="13" />
+                <polygon points="22 2 15 22 11 13 2 9 22 2" />
+              </svg>
             </button>
           )}
         </div>
-        <p className="mt-1.5 text-center text-[11px] text-zinc-500">
-          Gambar + ketikan terkirim jadi satu bubble • Key milikmu, tersimpan lokal
-        </p>
       </div>
     </div>
   );
