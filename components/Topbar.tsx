@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import { PROVIDERS } from "@/lib/providers";
 import type { ProviderId } from "@/lib/types";
 
@@ -15,6 +16,27 @@ interface Props {
 }
 
 export default function Topbar(props: Props) {
+  const [dropOpen, setDropOpen] = useState(false);
+  const dropRef = useRef<HTMLDivElement>(null);
+  const current = PROVIDERS.find((p) => p.id === props.provider) ?? PROVIDERS[0];
+
+  // Tutup dropdown saat klik di luar / tekan Escape
+  useEffect(() => {
+    if (!dropOpen) return;
+    const onDown = (e: MouseEvent) => {
+      if (dropRef.current && !dropRef.current.contains(e.target as Node)) setDropOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setDropOpen(false);
+    };
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [dropOpen]);
+
   return (
     <header className="flex shrink-0 flex-wrap items-center gap-2 border-b border-[var(--surface-border)] bg-[var(--bg)] px-3 py-3 sm:px-4">
       <div className="flex min-w-0 items-center gap-2">
@@ -35,19 +57,50 @@ export default function Topbar(props: Props) {
       </div>
 
       <div className="ml-auto flex shrink-0 items-center gap-2">
-        {/* Provider */}
-        <select
-          value={props.provider}
-          onChange={(e) => props.onProvider(e.target.value as ProviderId)}
-          className="cursor-pointer rounded-lg border border-[var(--surface-border)] bg-[var(--surface)] px-2.5 py-1.5 text-xs font-medium text-[var(--muted)] outline-none transition-colors hover:border-[var(--blue)] hover:text-[var(--ice)]"
-          title="Pilih provider"
-        >
-          {PROVIDERS.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.label}
-            </option>
-          ))}
-        </select>
+        {/* Provider — dropdown custom ngikut tema */}
+        <div ref={dropRef} className="relative">
+          <button
+            onClick={() => setDropOpen((v) => !v)}
+            title="Pilih provider"
+            className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-[var(--surface-border)] bg-[var(--surface)] px-2.5 py-1.5 text-xs font-medium text-[var(--muted)] outline-none transition-colors hover:border-[var(--blue)] hover:text-[var(--ice)]"
+          >
+            <span>{current.label}</span>
+            <svg
+              className={`h-3.5 w-3.5 transition-transform ${dropOpen ? "rotate-180" : ""}`}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          {dropOpen && (
+            <div className="absolute right-0 top-full z-50 mt-1 w-56 overflow-hidden rounded-xl border border-[var(--surface-border)] bg-[var(--bg)] p-1 shadow-2xl">
+              {PROVIDERS.map((p) => {
+                const selected = p.id === props.provider;
+                return (
+                  <button
+                    key={p.id}
+                    onClick={() => {
+                      props.onProvider(p.id);
+                      setDropOpen(false);
+                    }}
+                    title={p.keyHint}
+                    className={`w-full cursor-pointer rounded-lg px-3 py-2 text-left text-xs transition-colors ${
+                      selected
+                        ? "bg-[var(--blue-hover)] font-semibold text-[var(--blue)]"
+                        : "text-[var(--ice)] hover:bg-[var(--surface)]"
+                    }`}
+                  >
+                    {p.label}
+                    {selected && " ✓"}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
 
         <button
           onClick={props.onOpenKeys}
