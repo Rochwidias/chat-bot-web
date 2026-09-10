@@ -151,3 +151,21 @@ export const REASONING_META: Record<
   medium: { label: "Medium", icon: "⚖️", desc: "Seimbang (default)" },
   high: { label: "High", icon: "🧠", desc: "Mikir dalam, lambat tapi akurat" },
 };
+
+/** Daftar model live dari provider via route /api/models (server-side proxy). */
+export async function loadRemoteModels(
+  provider: ProviderId,
+  apiKey: string,
+  customBaseUrl: string
+): Promise<ModelOption[]> {
+  const q = new URLSearchParams({ provider, apiKey, baseUrl: customBaseUrl });
+  const res = await fetch(`/api/models?${q.toString()}`);
+  const json = (await res.json().catch(() => null)) as {
+    models?: ModelOption[];
+    error?: string;
+  } | null;
+  if (!res.ok) throw new Error(json?.error ?? `Gagal memuat model (${res.status})`);
+  if (!Array.isArray(json?.models) || json!.models!.length === 0)
+    throw new Error("Provider tidak mengembalikan daftar model.");
+  return json!.models!;
+}

@@ -10,9 +10,11 @@ interface Props {
   visionOk: boolean;
   models: ModelOption[];
   model: string;
+  modelsLoading: boolean;
   reasoning: ReasoningLevel;
   onModel: (m: string) => void;
   onReasoning: (r: ReasoningLevel) => void;
+  onRefreshModels: () => void;
   onSend: (text: string, images: ChatImage[]) => void;
   onStop: () => void;
 }
@@ -76,9 +78,11 @@ export default function ChatInput({
   visionOk,
   models,
   model,
+  modelsLoading,
   reasoning,
   onModel,
   onReasoning,
+  onRefreshModels,
   onSend,
   onStop,
 }: Props) {
@@ -127,12 +131,12 @@ export default function ChatInput({
   return (
     <div className="sticky bottom-0 shrink-0 border-t border-[var(--surface-border)] bg-[var(--bg)]">
       <div className="mx-auto w-full max-w-4xl px-3 sm:px-4">
-        {/* Dropdown model — ala personal-web */}
-        <div className="py-2">
+        {/* Dropdown model — ala personal-web + tombol refresh daftar live */}
+        <div className="flex items-center gap-1.5 py-2">
           <select
             value={models.some((m) => m.id === model) ? model : ""}
             onChange={(e) => onModel(e.target.value)}
-            className="w-full cursor-pointer truncate rounded-lg border border-[var(--surface-border)] bg-[var(--surface)] px-3 py-1.5 text-xs text-[var(--muted)] outline-none transition-colors hover:border-[var(--blue)] hover:text-[var(--ice)] sm:text-sm"
+            className="min-w-0 flex-1 cursor-pointer truncate rounded-lg border border-[var(--surface-border)] bg-[var(--surface)] px-3 py-1.5 text-xs text-[var(--muted)] outline-none transition-colors hover:border-[var(--blue)] hover:text-[var(--ice)] sm:text-sm"
             title={currentLabel}
           >
             {!models.some((m) => m.id === model) && (
@@ -145,6 +149,15 @@ export default function ChatInput({
               </option>
             ))}
           </select>
+          <button
+            onClick={onRefreshModels}
+            disabled={modelsLoading}
+            title={`Muat ulang daftar model (${models.length} model)`}
+            className="shrink-0 cursor-pointer rounded-lg border border-[var(--surface-border)] bg-[var(--surface)] px-2.5 py-1.5 text-xs text-[var(--muted)] transition-colors hover:border-[var(--blue)] hover:text-[var(--ice)] disabled:opacity-50"
+          >
+            <span className={modelsLoading ? "inline-block animate-spin" : ""}>↻</span>
+            <span className="ml-1 hidden sm:inline">{models.length}</span>
+          </button>
         </div>
 
         {/* Pill reasoning Fast/Medium/High */}

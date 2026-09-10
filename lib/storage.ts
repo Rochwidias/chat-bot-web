@@ -3,11 +3,33 @@ import {
   type AppSettings,
   type ChatSession,
   type ProviderKeys,
+  type ProviderId,
 } from "./types";
+import type { ModelOption } from "./providers";
 
 const K_SESSIONS = "cbw.sessions.v1";
 const K_KEYS = "cbw.keys.v1";
 const K_SETTINGS = "cbw.settings.v1";
+const K_MODELS = "cbw.models.v1";
+
+/** Cache daftar model per provider: { at: timestamp, models } */
+export type ModelsCache = Partial<
+  Record<ProviderId, { at: number; models: ModelOption[] }>
+>;
+
+export function loadModelsCache(): ModelsCache {
+  if (typeof window === "undefined") return {};
+  return safeParse<ModelsCache>(localStorage.getItem(K_MODELS), {});
+}
+
+export function saveModelsCache(c: ModelsCache): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(K_MODELS, JSON.stringify(c));
+  } catch {
+    /* abaikan */
+  }
+}
 
 function safeParse<T>(raw: string | null, fallback: T): T {
   if (!raw) return fallback;

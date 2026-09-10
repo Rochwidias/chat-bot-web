@@ -7,14 +7,17 @@ import ChatBubble from "@/components/ChatBubble";
 import ChatInput from "@/components/ChatInput";
 import ApiKeyModal from "@/components/ApiKeyModal";
 import EmptyState from "@/components/EmptyState";
-import { getProvider, supportsVision } from "@/lib/providers";
+import { getProvider, loadRemoteModels, supportsVision } from "@/lib/providers";
 import {
   loadKeys,
+  loadModelsCache,
   loadSessions,
   loadSettings,
   saveKeys,
+  saveModelsCache,
   saveSessions,
   saveSettings,
+  type ModelsCache,
 } from "@/lib/storage";
 import {
   uid,
@@ -35,13 +38,16 @@ export default function ChatPage() {
   const [keyOpen, setKeyOpen] = useState(false);
   const [sideOpen, setSideOpen] = useState(false);
   const [streaming, setStreaming] = useState(false);
+  const [modelsLoading, setModelsLoading] = useState(false);
+  const [modelCache, setModelCache] = useState<ModelsCache>(() => loadModelsCache());
   const [error, setError] = useState("");
-  const abortRef = useRef<AbortController | null>(null);
+  const abortRef = useRef<AbortController>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   // Persist otomatis
   useEffect(() => saveSettings(settings), [settings]);
   useEffect(() => saveSessions(sessions), [sessions]);
+  useEffect(() => saveModelsCache(modelCache), [modelCache]);
   // Tema ala personal-web: default dark, terang via class "light" di <html>.
   useEffect(() => {
     document.documentElement.classList.toggle("light", settings.theme === "light");
@@ -258,6 +264,50 @@ export default function ChatPage() {
 
   const stop = useCallback(() => abortRef.current?.abort(), []);
 
+  // ---------- daftar model live dari provider ----------
+  const CACHE_TTL = 24 * 3600 * 1000; // 24 jam
+
+  const refreshModels = useCallback(
+    async (manual = false) => {
+      const provider = settings.provider;
+      if (provider === "custom") return;
+      // OpenRouter publik (bisa tanpa key), provider lain butuh key.
+      if (!activeKey && provider !== "openrouter") {
+        if (manual) {
+          setError("Isi API key provider ini dulu untuk memuat daftar model.");
+          setKeyOpen(true);
+        }
+        return;
+      }
+      setModelsLoading(true);
+      try {
+        const list = await loadRemoteModels(provider, activeKey, settings.customBaseUrl);
+        setModelCache((prev) => ({ ...prev, [provider]: { at: Date.now(), models: list } }));
+        setSettings((s) =>
+          s.provider !== provider || list.some((m) => m.id === s.model)
+            ? s
+            : { ...s, model: list[0].id }
+        );
+        if (manual) setError("");
+      } catch (e) {
+        if (manual) setError(e instanceof Error ? e.message : String(e));
+      } finally {
+        setModelsLoading(false);
+      }
+    },
+    [settings.provider, settings.customBaseUrl, activeKey]
+  );
+
+  // Auto-load saat ganti provider / key tersedia, kecuali cache masih segar.
+  useEffect(() => {
+    if (settings.provider === "custom") return;
+    const hit = modelCache[settings.provider];
+    if (hit && Date.now() - hit.at < CACHE_TTL) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- sinkronisasi eksternal: muat daftar model live saat provider/key berubah
+    void refreshModels(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [settings.provider, activeKey]);
+
   // ---------- settings handlers ----------
   const setProvider = (p: ProviderId) => {
     const meta = getProvider(p);
@@ -270,6 +320,21 @@ export default function ChatPage() {
   };
 
   const providerMeta = getProvider(settings.provider);
+
+  // Daftar model: hasil load live (cache) > bawaan. Custom: ketik manual.
+  const availableModels = useMemo(() => {
+    if (settings.provider === "custom") {
+      return [
+        {
+          id: settings.model,
+          label: `${settings.model || "model-custom"} (custom)`,
+          vision: false,
+          reasoning: false,
+        },
+      ];
+    }
+    return modelCache[settings.provider]?.models ?? providerMeta.models;
+  }, [settings.provider, settings.model, modelCache, providerMeta]);
 
   return (
     <div className="flex h-screen overflow-hidden bg-[var(--bg)] text-[var(--ice)]">
@@ -326,15 +391,13 @@ export default function ChatPage() {
         <ChatInput
           streaming={streaming}
           visionOk={visionOk}
-          models={
-            settings.provider === "custom"
-              ? [{ id: settings.model, label: `${settings.model} (custom)`, vision: false, reasoning: false }]
-              : providerMeta.models
-          }
+          models={availableModels}
           model={settings.model}
+          modelsLoading={modelsLoading}
           reasoning={settings.reasoning}
           onModel={(m) => setSettings((s) => ({ ...s, model: m }))}
           onReasoning={(r: ReasoningLevel) => setSettings((s) => ({ ...s, reasoning: r }))}
+          onRefreshModels={() => void refreshModels(true)}
           onSend={send}
           onStop={stop}
         />
