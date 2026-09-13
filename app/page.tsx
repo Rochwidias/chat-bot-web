@@ -43,6 +43,12 @@ export default function ChatPage() {
   const [error, setError] = useState("");
   const abortRef = useRef<AbortController>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  // Cermin sinkron sessions untuk dibaca di dalam send() tanpa trik
+  // setState-dalam-Promise (rapuh terhadap batching React).
+  const sessionsRef = useRef<ChatSession[]>(sessions);
+  useEffect(() => {
+    sessionsRef.current = sessions;
+  }, [sessions]);
 
   // Persist otomatis
   useEffect(() => saveSettings(settings), [settings]);
@@ -74,6 +80,8 @@ export default function ChatPage() {
   }, [active?.messages.length, streaming, scrollDown]);
 
   // ---------- session ops ----------
+  // Kembalikan id sesi baru agar pemanggil sinkron (mis. EmptyState onPick)
+  // bisa langsung memakai id-nya tanpa menunggu setState commit.
   const newChat = useCallback(() => {
     const s: ChatSession = {
       id: uid("chat"),
@@ -85,6 +93,7 @@ export default function ChatPage() {
     setSessions((prev) => [s, ...prev]);
     setActiveId(s.id);
     setError("");
+    return s.id;
   }, []);
 
   // ID aktif efektif: pilihan user, atau sesi terbaru bila belum memilih. (dideklarasi di atas)
@@ -104,28 +113,29 @@ export default function ChatPage() {
 
   // ---------- kirim + streaming ----------
   const send = useCallback(
-    async (text: string, images: ChatImage[]) => {
-      let sid = effectiveId;
-      if (!sid) {
-        sid = uid("chat");
-        const s: ChatSession = {
-          id: sid,
-          title: (text || "Chat gambar").slice(0, 40) || "Chat baru",
-          messages: [],
-          createdAt: Date.now(),
-          updatedAt: Date.now(),
-        };
-        setSessions((prev) => [s, ...prev]);
-        setActiveId(sid);
-      }
-      const sessionId = sid;
-      setError("");
-
+    // sessionId opsional: bila diisi, pakai langsung (menghindari balapan
+    // setState seperti kasus EmptyState onPick yang memanggil newChat+send).
+    async (text: string, images: ChatImage[], sessionId?: string) => {
       if (!activeKey) {
         setError("API key untuk provider ini masih kosong.");
         setKeyOpen(true);
         return;
       }
+
+      // Tentukan sesi target. Bila tak ada (atau id titipan tak dikenal),
+      // siapkan sesi baru — pembuatannya dilakukan sekali jalan dengan
+      // append pesan di updater di bawah, agar tak ada sesi ganda.
+      const targetId = sessionId ?? effectiveId ?? uid("chat");
+      const now = Date.now();
+      const createdSession: ChatSession = {
+        id: targetId,
+        title: (text || "Chat gambar").slice(0, 40) || "Chat baru",
+        messages: [],
+        createdAt: now,
+        updatedAt: now,
+      };
+      if (!sessionId && !effectiveId) setActiveId(targetId);
+      setError("");
 
       const userMsg: ChatMessage = {
         id: uid("m"),
@@ -141,10 +151,25 @@ export default function ChatPage() {
         createdAt: Date.now(),
       };
 
-      // Judul otomatis dari pesan pertama
-      setSessions((prev) =>
-        prev.map((s) => {
-          if (s.id !== sessionId) return s;
+      // Snapshot sinkron via ref (selalu cermin sessions terbaru), tanpa
+      // trik setState-dalam-Promise (rapuh terhadap batching React).
+      // Sesi baru (bila id target belum ada) dibuat DI updater bawah, sekali
+      // jalan dengan append — mencakup kasus id titipan dari EmptyState
+      // onPick maupun jalur tanpa sesi.
+      const foundAtCall = sessionsRef.current.find((s) => s.id === targetId);
+      const baseMsgs: ChatMessage[] = foundAtCall?.messages ?? [];
+      setSessions((prev) => {
+        const found = prev.find((s) => s.id === targetId);
+        const nextMsgs = [...baseMsgs, userMsg, aiMsg];
+        if (!found) {
+          return [
+            { ...createdSession, messages: nextMsgs, updatedAt: Date.now() },
+            ...prev,
+          ];
+        }
+        // Judul otomatis dari pesan pertama
+        return prev.map((s) => {
+          if (s.id !== targetId) return s;
           const title =
             s.messages.length === 0
               ? (text || "Chat gambar").slice(0, 40)
@@ -152,25 +177,19 @@ export default function ChatPage() {
           return {
             ...s,
             title,
-            messages: [...s.messages, userMsg, aiMsg],
+            messages: nextMsgs,
             updatedAt: Date.now(),
           };
-        })
-      );
+        });
+      });
+      const nextMsgs = [...baseMsgs, userMsg, aiMsg];
 
       const ctrl = new AbortController();
       abortRef.current = ctrl;
       setStreaming(true);
 
       try {
-        // Ambil snapshot pesan terbaru (termasuk yang barusan) untuk dikirim
-        const current = await new Promise<ChatSession | undefined>((res) => {
-          setSessions((prev) => {
-            res(prev.find((s) => s.id === sessionId));
-            return prev;
-          });
-        });
-        const history = (current?.messages ?? []).map((m) => ({
+        const history = nextMsgs.map((m) => ({
           role: m.role,
           content: m.content,
           images: m.images?.map((i) => ({ dataUrl: i.dataUrl })),
@@ -218,7 +237,7 @@ export default function ChatPage() {
                 if (token) {
                   acc += token;
                   const snap = acc;
-                  patchMessages(sessionId, (msgs) =>
+                  patchMessages(targetId, (msgs) =>
                     msgs.map((m) => (m.id === aiMsg.id ? { ...m, content: snap } : m))
                   );
                 }
@@ -229,7 +248,7 @@ export default function ChatPage() {
           }
         }
         if (!acc) {
-          patchMessages(sessionId, (msgs) =>
+          patchMessages(targetId, (msgs) =>
             msgs.map((m) =>
               m.id === aiMsg.id ? { ...m, content: "(Tidak ada balasan dari model.)" } : m
             )
@@ -237,7 +256,7 @@ export default function ChatPage() {
         }
       } catch (e) {
         if ((e as Error).name === "AbortError") {
-          patchMessages(sessionId, (msgs) =>
+          patchMessages(targetId, (msgs) =>
             msgs.map((m) =>
               m.id === aiMsg.id
                 ? { ...m, content: m.content + "\n\n⏹ *Dihentikan oleh user.*" }
@@ -247,7 +266,7 @@ export default function ChatPage() {
         } else {
           const msg = e instanceof Error ? e.message : String(e);
           setError(msg);
-          patchMessages(sessionId, (msgs) =>
+          patchMessages(targetId, (msgs) =>
             msgs.map((m) =>
               m.id === aiMsg.id ? { ...m, content: `⚠️ ${msg}` } : m
             )
@@ -376,9 +395,11 @@ export default function ChatPage() {
             {!active || active.messages.length === 0 ? (
               <EmptyState
                 onPick={(t) => {
-                  if (!effectiveId) newChat();
-                  // Isi ke input? paling simpel: langsung kirim sebagai pesan pertama
-                  send(t, []);
+                  // Satu jalur pembuatan sesi: serahkan ke send(). Bila belum
+                  // ada sesi, buat dulu lalu teruskan id-nya agar send() tidak
+                  // membuat sesi kedua (dulu: newChat(); send() balapan).
+                  if (!effectiveId) void send(t, [], newChat());
+                  else void send(t, []);
                 }}
               />
             ) : (

@@ -84,7 +84,8 @@ export default function Sidebar({ sessions, activeId, onSelect, onNew, onDelete,
                     <button
                       onClick={() => onDelete(s.id)}
                       title="Hapus chat"
-                      className="rounded-md px-1.5 py-0.5 text-[var(--muted)] opacity-0 transition group-hover:opacity-100 hover:bg-red-500/10 hover:text-red-400"
+                      aria-label={`Hapus chat ${s.title}`}
+                      className="rounded-md px-1.5 py-0.5 text-[var(--muted)] transition hover:bg-red-500/10 hover:text-red-400 focus-visible:opacity-100 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100"
                     >
                       🗑
                     </button>

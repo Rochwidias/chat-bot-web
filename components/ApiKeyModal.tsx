@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PROVIDERS } from "@/lib/providers";
 import type { ProviderId, ProviderKeys } from "@/lib/types";
 
@@ -17,6 +17,16 @@ export default function ApiKeyModal({ open, provider, keys, customBaseUrl, onClo
   const [draft, setDraft] = useState<ProviderKeys>(keys);
   const [url, setUrl] = useState(customBaseUrl);
   const [show, setShow] = useState<Record<string, boolean>>({});
+
+  // Sinkronkan draft dari props tiap modal dibuka (komponen tetap mounted
+  // saat tertutup, jadi state lama bisa basi dan tersimpan ulang).
+  useEffect(() => {
+    if (open) {
+      setDraft(keys);
+      setUrl(customBaseUrl);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   if (!open) return null;
 

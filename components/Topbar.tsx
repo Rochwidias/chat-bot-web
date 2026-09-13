@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { PROVIDERS } from "@/lib/providers";
+import { useDismissible } from "@/lib/useDismissible";
 import type { ProviderId } from "@/lib/types";
 
 interface Props {
@@ -17,25 +18,10 @@ interface Props {
 
 export default function Topbar(props: Props) {
   const [dropOpen, setDropOpen] = useState(false);
-  const dropRef = useRef<HTMLDivElement>(null);
   const current = PROVIDERS.find((p) => p.id === props.provider) ?? PROVIDERS[0];
 
-  // Tutup dropdown saat klik di luar / tekan Escape
-  useEffect(() => {
-    if (!dropOpen) return;
-    const onDown = (e: MouseEvent) => {
-      if (dropRef.current && !dropRef.current.contains(e.target as Node)) setDropOpen(false);
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setDropOpen(false);
-    };
-    document.addEventListener("mousedown", onDown);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onDown);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [dropOpen]);
+  // Tutup dropdown saat klik di luar / tekan Escape (hook bersama).
+  const dropRef = useDismissible(dropOpen, () => setDropOpen(false));
 
   return (
     <header className="flex shrink-0 flex-wrap items-center gap-2 border-b border-[var(--surface-border)] bg-[var(--bg)] px-3 py-3 sm:px-4">

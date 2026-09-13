@@ -27,7 +27,7 @@ export const viewport: Viewport = {
 
 // Anti-flicker: samakan dengan personal-web — default dark,
 // class "light" di <html> berarti mode terang.
-const themeInitScript = `(function(){try{var t=localStorage.getItem("cbw.settings");var theme=t?JSON.parse(t).theme:"dark";if(theme==="light"){document.documentElement.classList.add("light")}else{document.documentElement.classList.remove("light")}}catch(e){}})();`;
+const themeInitScript = `(function(){try{var t=localStorage.getItem("cbw.settings.v1");var theme=t?JSON.parse(t).theme:"dark";if(theme==="light"){document.documentElement.classList.add("light")}else{document.documentElement.classList.remove("light")}}catch(e){}})();`;
 
 export default function RootLayout({
   children,

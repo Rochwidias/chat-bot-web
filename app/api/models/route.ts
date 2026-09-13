@@ -47,7 +47,9 @@ function normalize(m: UpstreamModel): ModelOption | null {
 export async function GET(req: NextRequest) {
   const sp = req.nextUrl.searchParams;
   const provider = (sp.get("provider") || "openai") as ProviderId;
-  const apiKey = sp.get("apiKey") || "";
+  // Key diutamakan dari header agar tak bocor ke access log via URL;
+  // query ?apiKey= tetap didukung sebagai fallback kompatibilitas lama.
+  const apiKey = req.headers.get("x-provider-key") || sp.get("apiKey") || "";
   const customBaseUrl = sp.get("baseUrl") || "";
 
   const meta = getProvider(provider);
@@ -58,12 +60,17 @@ export async function GET(req: NextRequest) {
     return Response.json({ error: "Base URL custom masih kosong." }, { status: 400 });
   }
 
+  // Referer/title OpenRouter bisa dioverride via env saat deploy
+  // (default localhost agar dev tetap jalan tanpa env).
+  const appReferer = process.env.OPENROUTER_REFERER || "http://localhost:3000";
+  const appTitle = process.env.OPENROUTER_TITLE || "ChatBot Web BYOK";
+
   const headers: Record<string, string> = {};
   if (apiKey) headers.Authorization = `Bearer ${apiKey}`;
   if (provider === "openrouter") {
     // Wajib untuk OpenRouter, diabaikan provider lain.
-    headers["HTTP-Referer"] = "http://localhost:3000";
-    headers["X-Title"] = "ChatBot Web BYOK";
+    headers["HTTP-Referer"] = appReferer;
+    headers["X-Title"] = appTitle;
   }
 
   let upstream: Response;

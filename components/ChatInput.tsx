@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { REASONING_META, type ModelOption } from "@/lib/providers";
+import { useDismissible } from "@/lib/useDismissible";
 import type { ChatImage, ReasoningLevel } from "@/lib/types";
 import { uid } from "@/lib/types";
 
@@ -94,31 +95,17 @@ export default function ChatInput({
   const [query, setQuery] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
   const areaRef = useRef<HTMLTextAreaElement>(null);
-  const dropRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
 
-  // Tutup dropdown saat klik di luar / tekan Escape
+  // Tutup dropdown saat klik di luar / tekan Escape (hook bersama;
+  // reset query tiap tutup agar pencarian tak basi).
+  const dropRef = useDismissible(dropOpen, () => setDropOpen(false), {
+    reset: () => setQuery(""),
+  });
+
+  // Fokus kolom search tiap dropdown dibuka.
   useEffect(() => {
-    if (!dropOpen) return;
-    const onDown = (e: MouseEvent) => {
-      if (dropRef.current && !dropRef.current.contains(e.target as Node)) {
-        setDropOpen(false);
-        setQuery("");
-      }
-    };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setDropOpen(false);
-        setQuery("");
-      }
-    };
-    document.addEventListener("mousedown", onDown);
-    document.addEventListener("keydown", onKey);
-    searchRef.current?.focus();
-    return () => {
-      document.removeEventListener("mousedown", onDown);
-      document.removeEventListener("keydown", onKey);
-    };
+    if (dropOpen) searchRef.current?.focus();
   }, [dropOpen]);
 
   const pick = async (files: FileList | null) => {

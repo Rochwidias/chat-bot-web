@@ -94,8 +94,12 @@ export function getProvider(id: ProviderId): ProviderMeta {
   return PROVIDERS.find((p) => p.id === id) ?? PROVIDERS[0];
 }
 
-/** Apakah model ini mendukung kirim gambar? (heuristik + daftar) */
+/** Apakah model ini mendukung kirim gambar? (daftar + heuristik) */
 export function supportsVision(modelId: string): boolean {
+  // Daftar statik dulu agar katalog tetap otoritatif untuk model dikenal.
+  for (const p of PROVIDERS)
+    for (const model of p.models)
+      if (model.id === modelId) return model.vision;
   const m = modelId.toLowerCase();
   if (
     m.includes("gpt-4o") ||
@@ -106,25 +110,28 @@ export function supportsVision(modelId: string): boolean {
     m.includes("o4")
   )
     return true;
-  for (const p of PROVIDERS)
-    for (const model of p.models)
-      if (model.id === modelId) return model.vision;
   return false;
 }
 
 /** Apakah model ini mendukung parameter reasoning? */
 export function supportsReasoning(modelId: string): boolean {
+  // Daftar statik dulu: otoritatif untuk model yang dikenal (mis.
+  // "gpt-4o-mini" punya reasoning:false dan tak boleh kena heuristik "o*").
+  for (const p of PROVIDERS)
+    for (const model of p.models)
+      if (model.id === modelId) return model.reasoning;
   const m = modelId.toLowerCase();
+  // Heuristik hanya untuk id tak dikenal: seri o (o1/o3/o4 + varian
+  // "o1-mini", "o4-mini-2025-...", dst.), GPT-5, dan reasoner.
+  // Pola (^|[/:_-])o\d mewajibkan digit setelah "o" agar "openai/...",
+  // "olmo", "orca", dsb. tidak salah kena.
+  if (/(^|[/:_-])o\d/i.test(modelId)) return true;
   if (
-    m.startsWith("o") ||
     m.includes("gpt-5") ||
     m.includes("reasoner") ||
     m.includes("reasoning")
   )
     return true;
-  for (const p of PROVIDERS)
-    for (const model of p.models)
-      if (model.id === modelId) return model.reasoning;
   return false;
 }
 
@@ -158,8 +165,13 @@ export async function loadRemoteModels(
   apiKey: string,
   customBaseUrl: string
 ): Promise<ModelOption[]> {
-  const q = new URLSearchParams({ provider, apiKey, baseUrl: customBaseUrl });
-  const res = await fetch(`/api/models?${q.toString()}`);
+  // Key dikirim via header (bukan query string) agar tak bocor ke access
+  // log/proxy. Route server tetap menerima query ?apiKey= sebagai fallback
+  // kompatibilitas lama.
+  const q = new URLSearchParams({ provider, baseUrl: customBaseUrl });
+  const res = await fetch(`/api/models?${q.toString()}`, {
+    headers: apiKey ? { "x-provider-key": apiKey } : undefined,
+  });
   const json = (await res.json().catch(() => null)) as {
     models?: ModelOption[];
     error?: string;

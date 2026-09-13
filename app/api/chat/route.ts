@@ -95,6 +95,11 @@ export async function POST(req: NextRequest) {
     payload.reasoning_effort = reasoningToEffort(body.reasoning);
   }
 
+  // Referer/title OpenRouter bisa dioverride via env saat deploy
+  // (default localhost agar dev tetap jalan tanpa env).
+  const appReferer = process.env.OPENROUTER_REFERER || "http://localhost:3000";
+  const appTitle = process.env.OPENROUTER_TITLE || "ChatBot Web BYOK";
+
   let upstream: Response;
   try {
     upstream = await fetch(`${baseUrl}/chat/completions`, {
@@ -103,8 +108,8 @@ export async function POST(req: NextRequest) {
         "Content-Type": "application/json",
         Authorization: `Bearer ${body.apiKey}`,
         // Wajib untuk OpenRouter, diabaikan provider lain.
-        "HTTP-Referer": "http://localhost:3000",
-        "X-Title": "ChatBot Web BYOK",
+        "HTTP-Referer": appReferer,
+        "X-Title": appTitle,
       },
       body: JSON.stringify(payload),
     });
@@ -124,14 +129,22 @@ export async function POST(req: NextRequest) {
   }
 
   // Teruskan stream provider → frontend sebagai event {token}.
+  // Pass-through ketat: [DONE] upstream diteruskan sekali lalu stream
+  // ditutup — tanpa [DONE] ganda (dulu: forward + selalu append final).
   const stream = new ReadableStream({
     async start(controller) {
       const reader = upstream.body!.getReader();
       const decoder = new TextDecoder();
       const encoder = new TextEncoder();
       let buf = "";
+      let doneSent = false;
 
       const push = (t: string) => controller.enqueue(encoder.encode(sse(t)));
+      const pushDone = () => {
+        if (doneSent) return;
+        doneSent = true;
+        controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+      };
 
       try {
         for (;;) {
@@ -145,7 +158,7 @@ export async function POST(req: NextRequest) {
             if (!t.startsWith("data:")) continue;
             const data = t.slice(5).trim();
             if (data === "[DONE]") {
-              controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+              pushDone();
               continue;
             }
             try {
@@ -160,13 +173,13 @@ export async function POST(req: NextRequest) {
             }
           }
         }
-        controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+        pushDone();
         controller.close();
       } catch (e) {
         controller.enqueue(
           encoder.encode(sse(`\n\n[n stream error: ${e instanceof Error ? e.message : e}]`))
         );
-        controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+        pushDone();
         controller.close();
       }
     },

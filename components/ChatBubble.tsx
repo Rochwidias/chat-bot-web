@@ -56,7 +56,27 @@ export default function ChatBubble({ msg }: { msg: ChatMessage }) {
           </p>
         ) : (
           <div className="prose-ai">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content || "…"}</ReactMarkdown>
+            {/* react-markdown aman dari XSS by default (tak ada dangerouslySetInnerHTML);
+                batasi skema URL + buka link eksternal di tab baru dengan rel aman. */}
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={{
+                a: ({ href, children }) => {
+                  const safe = /^https?:|^mailto:|^#/.test(href ?? "");
+                  return (
+                    <a
+                      href={safe ? href : "#"}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {children}
+                    </a>
+                  );
+                },
+              }}
+            >
+              {msg.content || "…"}
+            </ReactMarkdown>
           </div>
         )}
 
