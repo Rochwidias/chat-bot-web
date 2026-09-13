@@ -5,10 +5,14 @@ import {
   supportsVision,
   type ModelOption,
 } from "@/lib/providers";
+import { checkRateLimit, clientIp, validateBaseUrl } from "@/lib/security";
 import type { ProviderId } from "@/lib/types";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+const MODELS_WINDOW_MS = 60_000;
+const MODELS_MAX_PER_IP = 30;
 
 /** Model yang jelas bukan chat (embedding, TTS, gambar, moderasi). */
 const EXCLUDE = /embed|whisper|tts|dall-e|moderation|transcri|realtime|audio|flux|image-gen/i;
@@ -45,19 +49,36 @@ function normalize(m: UpstreamModel): ModelOption | null {
 }
 
 export async function GET(req: NextRequest) {
+  const ip = clientIp(req);
+  const limit = checkRateLimit("models:ip", ip, MODELS_MAX_PER_IP, MODELS_WINDOW_MS);
+  if (!limit.allowed) {
+    return Response.json(
+      { error: "Terlalu banyak request. Coba lagi sebentar." },
+      { status: 429 }
+    );
+  }
+
   const sp = req.nextUrl.searchParams;
   const provider = (sp.get("provider") || "openai") as ProviderId;
-  // Key diutamakan dari header agar tak bocor ke access log via URL;
-  // query ?apiKey= tetap didukung sebagai fallback kompatibilitas lama.
-  const apiKey = req.headers.get("x-provider-key") || sp.get("apiKey") || "";
+  // Key HANYA via header agar tak bocor ke access log via URL.
+  // Fallback ?apiKey= dihapus (pecah kompatibilitas lama demi keamanan).
+  const apiKey = req.headers.get("x-provider-key") || "";
   const customBaseUrl = sp.get("baseUrl") || "";
 
+  const VALID_PROVIDERS = ["openai", "openrouter", "gemini", "deepseek", "custom"];
+  if (!VALID_PROVIDERS.includes(provider)) {
+    return Response.json({ error: "Provider tidak dikenal." }, { status: 400 });
+  }
   const meta = getProvider(provider);
-  const baseUrl = (
-    provider === "custom" ? customBaseUrl || meta.baseUrl : meta.baseUrl
-  ).replace(/\/$/, "");
-  if (!baseUrl) {
-    return Response.json({ error: "Base URL custom masih kosong." }, { status: 400 });
+  let baseUrl = meta.baseUrl;
+  if (provider === "custom") {
+    const checked = await validateBaseUrl(customBaseUrl);
+    if (!checked.ok) {
+      return Response.json({ error: checked.error }, { status: 400 });
+    }
+    baseUrl = checked.baseUrl;
+  } else if (!baseUrl) {
+    return Response.json({ error: "Base URL provider belum dikonfigurasi." }, { status: 400 });
   }
 
   // Referer/title OpenRouter bisa dioverride via env saat deploy
@@ -75,7 +96,10 @@ export async function GET(req: NextRequest) {
 
   let upstream: Response;
   try {
-    upstream = await fetch(`${baseUrl}/models`, { headers });
+    upstream = await fetch(`${baseUrl}/models`, {
+      headers,
+      signal: AbortSignal.timeout(30_000),
+    });
   } catch (e) {
     return Response.json(
       { error: `Gagal menghubungi provider: ${e instanceof Error ? e.message : e}` },

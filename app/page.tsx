@@ -302,11 +302,13 @@ export default function ChatPage() {
       try {
         const list = await loadRemoteModels(provider, activeKey, settings.customBaseUrl);
         setModelCache((prev) => ({ ...prev, [provider]: { at: Date.now(), models: list } }));
-        setSettings((s) =>
-          s.provider !== provider || list.some((m) => m.id === s.model)
-            ? s
-            : { ...s, model: list[0].id }
-        );
+        setSettings((s) => {
+          if (s.provider !== provider) return s;
+          if (list.some((m) => m.id === s.model)) return s;
+          const first = list[0];
+          if (!first) return s;
+          return { ...s, model: first.id };
+        });
         if (manual) setError("");
       } catch (e) {
         if (manual) setError(e instanceof Error ? e.message : String(e));

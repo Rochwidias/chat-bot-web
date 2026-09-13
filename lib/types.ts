@@ -58,7 +58,14 @@ export const DEFAULT_SETTINGS: AppSettings = {
 };
 
 export function uid(prefix = "id"): string {
+  try {
+    if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
+      return `${prefix}_${crypto.randomUUID()}`;
+    }
+  } catch {
+    /* fallback di bawah */
+  }
   return `${prefix}_${Date.now().toString(36)}_${Math.random()
     .toString(36)
-    .slice(2, 8)}`;
+    .slice(2, 8)}${Math.random().toString(36).slice(2, 6)}`;
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { ChatMessage } from "@/lib/types";
@@ -61,8 +61,8 @@ export default function ChatBubble({ msg }: { msg: ChatMessage }) {
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
               components={{
-                a: ({ href, children }) => {
-                  const safe = /^https?:|^mailto:|^#/.test(href ?? "");
+                a: ({ href, children }: { href?: string; children?: React.ReactNode }) => {
+                  const safe = /^(https?:|mailto:|#)/i.test(href ?? "");
                   return (
                     <a
                       href={safe ? href : "#"}

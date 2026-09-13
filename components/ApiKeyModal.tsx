@@ -72,7 +72,9 @@ export default function ApiKeyModal({ open, provider, keys, customBaseUrl, onClo
                 <input
                   type={show[p.id] ? "text" : "password"}
                   value={draft[p.id] ?? ""}
-                  onChange={(e) => setDraft({ ...draft, [p.id]: e.target.value.trim() })}
+                  // Jangan trim saat ketik (kursor loncat + key ber-spasi rusak);
+                  // trim dilakukan sekali saat Simpan.
+                  onChange={(e) => setDraft({ ...draft, [p.id]: e.target.value })}
                   placeholder={p.keyPlaceholder}
                   className="min-w-0 flex-1 rounded-lg border border-[var(--surface-border)] bg-[var(--bg)] px-2.5 py-1.5 font-mono text-xs text-[var(--ice)] outline-none placeholder:text-[var(--muted)] focus:border-[var(--blue)]"
                 />
@@ -91,7 +93,7 @@ export default function ApiKeyModal({ open, provider, keys, customBaseUrl, onClo
             <p className="mb-1.5 text-[13px] font-semibold text-[var(--ice)]">Custom Base URL</p>
             <input
               value={url}
-              onChange={(e) => setUrl(e.target.value.trim())}
+              onChange={(e) => setUrl(e.target.value)}
               placeholder="http://localhost:11434/v1 (kosongkan bila tak dipakai)"
               className="w-full rounded-lg border border-[var(--surface-border)] bg-[var(--bg)] px-2.5 py-1.5 font-mono text-xs text-[var(--ice)] outline-none placeholder:text-[var(--muted)] focus:border-[var(--blue)]"
             />
@@ -107,7 +109,13 @@ export default function ApiKeyModal({ open, provider, keys, customBaseUrl, onClo
           </button>
           <button
             onClick={() => {
-              onSave(draft, url);
+              // Normalisasi sekali saat simpan: trim spasi tepi, buang key kosong.
+              const cleaned: ProviderKeys = {};
+              for (const [k, v] of Object.entries(draft)) {
+                const t = (v ?? "").trim();
+                if (t) cleaned[k as ProviderId] = t;
+              }
+              onSave(cleaned, url.trim());
               onClose();
             }}
             className="flex-1 cursor-pointer rounded-xl bg-[var(--blue)] px-4 py-2 text-sm font-semibold text-white hover:opacity-90"

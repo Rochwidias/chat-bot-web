@@ -5,10 +5,23 @@ import {
   reasoningToEffort,
   supportsReasoning,
 } from "@/lib/providers";
+import {
+  MAX_DATAURL_LEN,
+  MAX_MSG_LEN,
+  checkRateLimit,
+  clientIp,
+  isSameOrigin,
+  isValidModelId,
+  validateBaseUrl,
+} from "@/lib/security";
 import type { ProviderId, ReasoningLevel } from "@/lib/types";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+const CHAT_WINDOW_MS = 60_000;
+const CHAT_MAX_PER_IP = 30;
+const UPSTREAM_TIMEOUT_MS = 60_000;
 
 interface IncomingImage {
   dataUrl: string;
@@ -57,33 +70,70 @@ function toOpenAIMessages(body: ChatBody) {
 }
 
 export async function POST(req: NextRequest) {
+  if (!isSameOrigin(req)) {
+    return Response.json({ error: "Tidak diizinkan." }, { status: 403 });
+  }
+  const ip = clientIp(req);
+  const limit = checkRateLimit("chat:ip", ip, CHAT_MAX_PER_IP, CHAT_WINDOW_MS);
+  if (!limit.allowed) {
+    return Response.json(
+      { error: "Terlalu banyak request. Coba lagi sebentar." },
+      { status: 429 }
+    );
+  }
+
   let body: ChatBody;
   try {
     body = (await req.json()) as ChatBody;
   } catch {
     return Response.json({ error: "Body JSON tidak valid." }, { status: 400 });
   }
+  if (!body || typeof body !== "object") {
+    return Response.json({ error: "Body JSON tidak valid." }, { status: 400 });
+  }
 
-  if (!body.apiKey) {
+  if (typeof body.apiKey !== "string" || !body.apiKey || body.apiKey.length > 500) {
     return Response.json(
       { error: "API key kosong. Klik tombol “Isi API Key” di topbar dulu bang." },
       { status: 401 }
     );
   }
-  if (!body.model) return Response.json({ error: "Model belum dipilih." }, { status: 400 });
-  if (!body.messages?.length)
-    return Response.json({ error: "Pesan kosong." }, { status: 400 });
+  if (!isValidModelId(body.model)) {
+    return Response.json({ error: "Model belum dipilih / tidak valid." }, { status: 400 });
+  }
+  if (!body.messages?.length || body.messages.length > 60)
+    return Response.json({ error: "Pesan kosong / terlalu banyak." }, { status: 400 });
+  for (const m of body.messages) {
+    if (m.role !== "user" && m.role !== "assistant" && m.role !== "system") {
+      return Response.json({ error: "Role pesan tidak valid." }, { status: 400 });
+    }
+    if (typeof m.content !== "string" || m.content.length > MAX_MSG_LEN) {
+      return Response.json({ error: "Isi pesan terlalu panjang." }, { status: 400 });
+    }
+    if (m.images && (!Array.isArray(m.images) || m.images.length > 4)) {
+      return Response.json({ error: "Gambar maksimal 4 per pesan." }, { status: 400 });
+    }
+    for (const img of m.images ?? []) {
+      if (typeof img?.dataUrl !== "string" || img.dataUrl.length > MAX_DATAURL_LEN) {
+        return Response.json({ error: "Gambar terlalu besar." }, { status: 400 });
+      }
+    }
+  }
 
+  const VALID_PROVIDERS = ["openai", "openrouter", "gemini", "deepseek", "custom"];
+  if (!VALID_PROVIDERS.includes(body.provider)) {
+    return Response.json({ error: "Provider tidak dikenal." }, { status: 400 });
+  }
   const meta = getProvider(body.provider);
-  const baseUrl =
-    body.provider === "custom"
-      ? (body.customBaseUrl || meta.baseUrl).replace(/\/$/, "")
-      : meta.baseUrl;
-  if (!baseUrl)
-    return Response.json(
-      { error: "Base URL custom masih kosong. Isi di modal API key." },
-      { status: 400 }
-    );
+  let baseUrl = meta.baseUrl;
+  if (body.provider === "custom") {
+    const checked = await validateBaseUrl(body.customBaseUrl || "");
+    if (!checked.ok) {
+      // Pesan spesifik (termasuk penolakan SSRF) agar user paham kenapa ditolak.
+      return Response.json({ error: checked.error }, { status: 400 });
+    }
+    baseUrl = checked.baseUrl;
+  }
 
   const payload: Record<string, unknown> = {
     model: body.model,
@@ -104,6 +154,8 @@ export async function POST(req: NextRequest) {
   try {
     upstream = await fetch(`${baseUrl}/chat/completions`, {
       method: "POST",
+      // Batas 60 detik agar request gantung dari upstream tak menahan koneksi selamanya.
+      signal: AbortSignal.timeout(UPSTREAM_TIMEOUT_MS),
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${body.apiKey}`,

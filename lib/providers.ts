@@ -166,8 +166,8 @@ export async function loadRemoteModels(
   customBaseUrl: string
 ): Promise<ModelOption[]> {
   // Key dikirim via header (bukan query string) agar tak bocor ke access
-  // log/proxy. Route server tetap menerima query ?apiKey= sebagai fallback
-  // kompatibilitas lama.
+  // log/proxy. Route server HANYA menerima header x-provider-key
+  // (fallback ?apiKey= sengaja dihapus demi keamanan).
   const q = new URLSearchParams({ provider, baseUrl: customBaseUrl });
   const res = await fetch(`/api/models?${q.toString()}`, {
     headers: apiKey ? { "x-provider-key": apiKey } : undefined,
