@@ -6,13 +6,22 @@ import Topbar from "@/components/Topbar";
 import ChatBubble from "@/components/ChatBubble";
 import ChatInput from "@/components/ChatInput";
 import ApiKeyModal from "@/components/ApiKeyModal";
+import AppearanceModal from "@/components/AppearanceModal";
 import EmptyState from "@/components/EmptyState";
 import { getProvider, loadRemoteModels, supportsVision } from "@/lib/providers";
 import {
+  applyAppearance,
+  withMode,
+  withPreset,
+  type AppearanceSettings,
+} from "@/lib/theme";
+import {
+  loadAppearance,
   loadKeys,
   loadModelsCache,
   loadSessions,
   loadSettings,
+  saveAppearance,
   saveKeys,
   saveModelsCache,
   saveSessions,
@@ -36,6 +45,10 @@ export default function ChatPage() {
   const [sessions, setSessions] = useState<ChatSession[]>(() => loadSessions());
   const [activeId, setActiveId] = useState<string | null>(null);
   const [keyOpen, setKeyOpen] = useState(false);
+  const [appearanceOpen, setAppearanceOpen] = useState(false);
+  const [appearance, setAppearance] = useState<AppearanceSettings>(() =>
+    loadAppearance(loadSettings().theme)
+  );
   const [sideOpen, setSideOpen] = useState(false);
   const [streaming, setStreaming] = useState(false);
   const [modelsLoading, setModelsLoading] = useState(false);
@@ -54,10 +67,26 @@ export default function ChatPage() {
   useEffect(() => saveSettings(settings), [settings]);
   useEffect(() => saveSessions(sessions), [sessions]);
   useEffect(() => saveModelsCache(modelCache), [modelCache]);
-  // Tema ala personal-web: default dark, terang via class "light" di <html>.
+  // Appearance redesign-v2: terapkan ke <html> + simpan (cbw.theme.v1).
+  // Sinkronisasi settings.theme lama dilakukan di handler (bukan di sini)
+  // agar tak ada setState-dalam-effect.
   useEffect(() => {
-    document.documentElement.classList.toggle("light", settings.theme === "light");
-  }, [settings.theme]);
+    applyAppearance(appearance);
+    saveAppearance(appearance);
+  }, [appearance]);
+
+  /** Ganti appearance + cerminkan mode ke settings.theme lama (fallback anti-flicker). */
+  const updateAppearance = useCallback(
+    (fn: (a: AppearanceSettings) => AppearanceSettings) => {
+      const next = fn(appearance);
+      setAppearance(next);
+      if (next.mode !== appearance.mode) {
+        const mode = next.mode;
+        setSettings((s) => (s.theme === mode ? s : { ...s, theme: mode }));
+      }
+    },
+    [appearance]
+  );
 
   // ID aktif efektif: pilihan user, atau sesi terbaru bila belum memilih.
   const effectiveId = activeId ?? sessions[0]?.id ?? null;
@@ -358,10 +387,15 @@ export default function ChatPage() {
   }, [settings.provider, settings.model, modelCache, providerMeta]);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[var(--bg)] text-[var(--ice)]">
+    <div className="relative flex h-screen overflow-hidden bg-[var(--bg)] text-[var(--ink)]">
+      <div className="app-atmos" aria-hidden />
       <Sidebar
         sessions={sessions}
         activeId={effectiveId}
+        provider={providerMeta.label}
+        model={settings.model}
+        modelCount={availableModels.length}
+        hasKey={!!activeKey}
         onSelect={setActiveId}
         onNew={newChat}
         onDelete={(id) => {
@@ -372,16 +406,18 @@ export default function ChatPage() {
         onClose={() => setSideOpen(false)}
       />
 
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="relative z-[1] flex min-w-0 flex-1 flex-col">
         <Topbar
           provider={settings.provider}
           hasKey={!!activeKey}
-          theme={settings.theme}
+          theme={appearance.mode}
           streaming={streaming}
+          chatTitle={active && active.messages.length > 0 ? active.title : null}
           onProvider={setProvider}
           onOpenKeys={() => setKeyOpen(true)}
+          onOpenSettings={() => setAppearanceOpen(true)}
           onToggleTheme={() =>
-            setSettings((s) => ({ ...s, theme: s.theme === "dark" ? "light" : "dark" }))
+            updateAppearance((a) => withMode(a, a.mode === "dark" ? "light" : "dark"))
           }
           onToggleSidebar={() => setSideOpen((v) => !v)}
         />
@@ -393,7 +429,7 @@ export default function ChatPage() {
         )}
 
         <main className="flex-1 overflow-y-auto overscroll-contain">
-          <div className="mx-auto flex min-h-full w-full max-w-4xl flex-col px-3 py-4 sm:px-4">
+          <div className="mx-auto flex min-h-full w-full max-w-[760px] flex-col px-3.5 py-[18px]">
             {!active || active.messages.length === 0 ? (
               <EmptyState
                 onPick={(t) => {
@@ -405,7 +441,16 @@ export default function ChatPage() {
                 }}
               />
             ) : (
-              active.messages.map((m) => <ChatBubble key={m.id} msg={m} />)
+              <>
+                <div className="mb-4 flex items-center gap-2.5 font-mono text-[11px] text-[var(--muted)]">
+                  <span className="h-px flex-1 bg-[var(--border)]" aria-hidden />
+                  <span>Hari ini · {sessions.length} sesi</span>
+                  <span className="h-px flex-1 bg-[var(--border)]" aria-hidden />
+                </div>
+                {active.messages.map((m) => (
+                  <ChatBubble key={m.id} msg={m} modelLabel={settings.model} />
+                ))}
+              </>
             )}
             <div ref={bottomRef} />
           </div>
@@ -437,6 +482,15 @@ export default function ChatPage() {
           saveKeys(k);
           setSettings((s) => ({ ...s, customBaseUrl: url }));
         }}
+      />
+
+      <AppearanceModal
+        open={appearanceOpen}
+        value={appearance}
+        onChange={(a) => updateAppearance(() => a)}
+        onPreset={(p) => updateAppearance((prev) => withPreset(prev, p))}
+        onMode={(m) => updateAppearance((prev) => withMode(prev, m))}
+        onClose={() => setAppearanceOpen(false)}
       />
     </div>
   );

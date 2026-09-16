@@ -23,6 +23,7 @@ interface Props {
 
 const MAX_FILES = 4;
 const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_LEN = 4000;
 
 const LEVELS: ReasoningLevel[] = ["fast", "medium", "high"];
 
@@ -94,7 +95,16 @@ export default function ChatInput({
     requestAnimationFrame(() => areaRef.current?.focus());
   };
 
+  // Autosize textarea 1–5 baris (maks 132px, ala mockup).
+  useEffect(() => {
+    const el = areaRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, 132)}px`;
+  }, [text]);
+
   const currentLabel = models.find((m) => m.id === model)?.label ?? model;
+  const currentVision = models.find((m) => m.id === model)?.vision ?? visionOk;
   const q = query.trim().toLowerCase();
   const filtered = q
     ? models.filter(
@@ -103,42 +113,52 @@ export default function ChatInput({
     : models;
 
   return (
-    <div className="sticky bottom-0 shrink-0 border-t border-[var(--surface-border)] bg-[var(--bg)]">
-      <div className="mx-auto w-full max-w-4xl px-3 sm:px-4">
-        {/* Dropdown model custom: searchable + ngikut tema (light/dark) */}
-        <div className="flex items-center gap-1.5 py-2">
+    <div className="sticky bottom-0 shrink-0 border-t border-[var(--border)] bg-[var(--panel)]">
+      <div className="mx-auto w-full max-w-[760px] px-3 py-2.5 sm:px-3.5 sm:py-3">
+        <div className="chat-panel">
+        {/* Baris model: tombol dropdown + refresh (ala mockup) */}
+        <div className="flex items-center gap-1.5 py-1.5">
           <div ref={dropRef} className="relative min-w-0 flex-1">
             <button
               onClick={() => setDropOpen((v) => !v)}
               title={currentLabel}
-              className="flex w-full cursor-pointer items-center justify-between gap-2 truncate rounded-lg border border-[var(--surface-border)] bg-[var(--surface)] px-3 py-1.5 text-xs text-[var(--muted)] outline-none transition-colors hover:border-[var(--blue)] hover:text-[var(--ice)] sm:text-sm"
+              aria-haspopup="listbox"
+              aria-expanded={dropOpen}
+              className="flex w-full cursor-pointer items-center justify-between gap-2 truncate rounded-lg px-2 py-1.5 text-[12.5px] font-semibold text-[var(--mid)] outline-none transition-colors hover:bg-[var(--surface2)] hover:text-[var(--ink)]"
             >
-              <span className="truncate">{currentLabel}</span>
-              <svg
-                className={`h-4 w-4 shrink-0 transition-transform ${dropOpen ? "rotate-180" : ""}`}
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <polyline points="6 9 12 15 18 9" />
-              </svg>
+              <span className="truncate font-mono text-[11.5px]">{currentLabel}</span>
+              <span className="flex shrink-0 items-center gap-1.5">
+                {currentVision && (
+                  <span className="bdg" title="Support gambar">
+                    🖼️ vision
+                  </span>
+                )}
+                <svg
+                  className={`h-4 w-4 transition-transform ${dropOpen ? "rotate-180" : ""}`}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </span>
             </button>
 
             {dropOpen && (
-              <div className="absolute bottom-full left-0 right-0 z-50 mb-1 overflow-hidden rounded-xl border border-[var(--surface-border)] bg-[var(--bg)] shadow-2xl">
+              <div className="absolute bottom-full left-0 right-0 z-50 mb-1 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--bg)] shadow-2xl">
                 {/* Kolom search */}
-                <div className="border-b border-[var(--surface-border)] p-2">
+                <div className="border-b border-[var(--border)] p-2">
                   <input
                     ref={searchRef}
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder={`🔍 Cari dari ${models.length} model…`}
-                    className="w-full rounded-lg border border-[var(--surface-border)] bg-[var(--surface)] px-3 py-1.5 text-xs text-[var(--ice)] outline-none placeholder:text-[var(--muted)] focus:border-[var(--blue)] sm:text-sm"
+                    className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-xs text-[var(--ink)] outline-none placeholder:text-[var(--muted)] focus:border-[var(--accent)] sm:text-sm"
                   />
                 </div>
                 {/* Hasil */}
-                <div className="max-h-60 overflow-y-auto p-1">
+                <div className="max-h-60 overflow-y-auto p-1" role="listbox">
                   {filtered.length === 0 && (
                     <p className="px-3 py-4 text-center text-xs text-[var(--muted)]">
                       Tidak ketemu “{query}”, coba kata lain.
@@ -155,10 +175,12 @@ export default function ChatInput({
                           setQuery("");
                         }}
                         title={m.id}
+                        role="option"
+                        aria-selected={selected}
                         className={`flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-left text-xs transition-colors sm:text-sm ${
                           selected
-                            ? "bg-[var(--blue-hover)] text-[var(--blue)]"
-                            : "text-[var(--ice)] hover:bg-[var(--surface)]"
+                            ? "bg-[var(--accent-soft)] text-[var(--accent)]"
+                            : "text-[var(--ink)] hover:bg-[var(--surface)]"
                         }`}
                       >
                         <span className="min-w-0 flex-1 truncate">{m.label}</span>
@@ -181,7 +203,7 @@ export default function ChatInput({
             onClick={onRefreshModels}
             disabled={modelsLoading}
             title={`Muat ulang daftar model (${models.length} model)`}
-            className="shrink-0 cursor-pointer rounded-lg border border-[var(--surface-border)] bg-[var(--surface)] px-2.5 py-1.5 text-xs text-[var(--muted)] transition-colors hover:border-[var(--blue)] hover:text-[var(--ice)] disabled:opacity-50"
+            className="shrink-0 cursor-pointer rounded-lg border border-[var(--border)] bg-transparent px-2 py-1 text-xs text-[var(--muted)] transition-colors hover:border-[var(--accent)] hover:text-[var(--ink)] disabled:opacity-50"
           >
             <span className={modelsLoading ? "inline-block animate-spin" : ""}>↻</span>
             <span className="ml-1 hidden sm:inline">{models.length}</span>
@@ -189,7 +211,7 @@ export default function ChatInput({
         </div>
 
         {/* Pill reasoning Fast/Medium/High */}
-        <div className="flex flex-wrap items-center gap-1.5 pb-1 text-xs text-[var(--muted)]">
+        <div className="flex flex-wrap items-center gap-1.5 px-0.5 pb-2 text-xs text-[var(--muted)]" role="group" aria-label="Level reasoning">
           {LEVELS.map((lv) => {
             const active = reasoning === lv;
             return (
@@ -197,10 +219,11 @@ export default function ChatInput({
                 key={lv}
                 onClick={() => onReasoning(lv)}
                 title={REASONING_META[lv].desc}
-                className={`cursor-pointer rounded-full border px-2.5 py-1 font-medium transition-colors ${
+                aria-pressed={active}
+                className={`cursor-pointer rounded-full border px-3 py-[5px] text-[11.5px] font-semibold transition-colors ${
                   active
-                    ? "border-[var(--blue)] bg-[var(--blue)] text-white"
-                    : "border-[var(--surface-border)] bg-[var(--surface)] hover:border-[var(--blue)] hover:text-[var(--ice)]"
+                    ? "border-[var(--accent)] bg-[var(--accent)] text-[var(--accent-ink)]"
+                    : "border-[var(--border)] bg-transparent hover:border-[var(--accent)] hover:text-[var(--ink)]"
                 }`}
               >
                 {REASONING_META[lv].icon} {REASONING_META[lv].label}
@@ -214,33 +237,37 @@ export default function ChatInput({
           )}
         </div>
 
-        {/* Preview gambar sebelum dikirim */}
+        <div className="chat-hr" />
+
+        {/* Preview gambar sebelum dikirim (chip ala mockup) */}
         {images.length > 0 && (
-          <div className="flex flex-wrap gap-2 pb-2">
+          <div className="flex flex-wrap gap-2 px-0.5 pb-2">
             {images.map((img) => (
-              <div key={img.id} className="relative inline-block">
+              <span key={img.id} className="flex items-center gap-1.5 rounded-[10px] border border-[var(--border)] bg-[var(--surface2)] py-1 pl-1 pr-1.5 text-[11.5px] text-[var(--mid)]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={img.dataUrl}
                   alt={img.name}
-                  className="h-20 w-20 rounded-lg border border-[var(--surface-border)] object-cover"
+                  className="h-7 w-[34px] rounded-[7px] object-cover"
                 />
+                <span className="max-w-[120px] truncate" title={img.name}>{img.name}</span>
                 <button
                   onClick={() => setImages(images.filter((i) => i.id !== img.id))}
-                  className="absolute -right-2 -top-2 flex h-5 w-5 cursor-pointer items-center justify-center rounded-full bg-red-500 text-xs text-white transition-colors hover:bg-red-600"
+                  className="cursor-pointer rounded-md px-1 text-[13px] text-[var(--muted)] hover:text-red-400"
                   title="Hapus gambar"
+                  aria-label={`Hapus gambar ${img.name}`}
                 >
                   ×
                 </button>
-              </div>
+              </span>
             ))}
           </div>
         )}
 
-        {warn && <p className="pb-1 text-[11px] text-red-400">{warn}</p>}
+        {warn && <p className="px-0.5 pb-1 text-[11px] text-red-400">{warn}</p>}
 
-        {/* Bar input — ala personal-web */}
-        <div className="flex items-center gap-1.5 py-2 sm:gap-2 sm:py-3">
+        {/* Bar input: attach + textarea transparan + kirim */}
+        <div className="flex items-end gap-2">
           <input
             ref={fileRef}
             type="file"
@@ -255,7 +282,7 @@ export default function ChatInput({
           <button
             onClick={() => fileRef.current?.click()}
             disabled={streaming}
-            className="shrink-0 cursor-pointer rounded-xl border border-[var(--surface-border)] bg-[var(--surface)] px-2.5 py-2 text-sm font-medium text-[var(--muted)] transition-colors hover:border-[var(--blue)] hover:text-[var(--ice)] disabled:opacity-30 sm:px-3"
+            className="shrink-0 cursor-pointer rounded-xl border border-[var(--border)] bg-transparent px-3 py-2.5 text-sm text-[var(--muted)] transition-colors hover:border-[var(--accent)] hover:text-[var(--ink)] disabled:opacity-30"
             title="Upload gambar (max 4, @5MB)"
           >
             📎
@@ -263,7 +290,7 @@ export default function ChatInput({
           <textarea
             ref={areaRef}
             value={text}
-            onChange={(e) => setText(e.target.value)}
+            onChange={(e) => setText(e.target.value.slice(0, MAX_LEN + 100))}
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
@@ -271,11 +298,11 @@ export default function ChatInput({
               }
             }}
             rows={1}
-            placeholder="Ketik pesan..."
+            placeholder="Ketik pesan… (Enter kirim, Shift+Enter baris baru)"
             autoCorrect="off"
             autoComplete="off"
             spellCheck="false"
-            className="min-w-0 flex-1 resize-none rounded-xl border border-[var(--surface-border)] bg-[var(--surface)] px-3 py-2.5 text-base text-[var(--ice)] outline-none transition-colors placeholder:text-[var(--muted)] focus:border-[var(--blue)] disabled:opacity-50 sm:px-4 sm:text-sm"
+            className="max-h-[132px] min-w-0 flex-1 resize-none bg-transparent px-0.5 py-2 text-[var(--fs)] leading-[1.65] text-[var(--ink)] outline-none placeholder:text-[var(--muted)] disabled:opacity-50"
           />
           {streaming ? (
             <button
@@ -292,16 +319,19 @@ export default function ChatInput({
             <button
               onClick={send}
               disabled={!text.trim() && images.length === 0}
-              className="shrink-0 cursor-pointer rounded-xl bg-[var(--blue)] p-2.5 text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-30"
+              className="shrink-0 cursor-pointer rounded-xl bg-[var(--accent)] px-3.5 py-[11px] text-[15px] font-bold text-[var(--accent-ink)] transition hover:brightness-[1.07] disabled:cursor-not-allowed disabled:opacity-35"
               title="Kirim"
               aria-label="Kirim pesan"
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <line x1="22" y1="2" x2="11" y2="13" />
-                <polygon points="22 2 15 22 11 13 2 9 22 2" />
-              </svg>
+              ➤
             </button>
           )}
+        </div>
+        </div>
+        {/* Microcopy + counter ala mockup */}
+        <div className="flex gap-2 px-1 pt-2 font-mono text-[10.5px] text-[var(--muted)]">
+          <span>BYOK · key di browser saja</span>
+          <span className="ml-auto">{text.length} / {MAX_LEN}</span>
         </div>
       </div>
     </div>

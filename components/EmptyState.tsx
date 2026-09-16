@@ -9,25 +9,29 @@ const SUGGESTIONS = [
 
 export default function EmptyState({ onPick }: { onPick: (text: string) => void }) {
   return (
-    <div className="flex h-full flex-col items-center justify-center px-4 text-center text-[var(--muted)]">
-      <span className="mb-4 text-5xl">🤖</span>
-      <h2 className="mb-1 text-lg font-semibold text-[var(--ice)]">
+    <div className="flex h-full flex-col items-center justify-center px-4 py-8 text-center text-[var(--muted)]">
+      <div className="orb orb-lg mb-3" aria-hidden>🤖</div>
+      <h2 className="font-display mb-1 text-[19px] font-bold text-[var(--ink)]">
         Mulai ngobrol dengan AI
       </h2>
-      <p className="max-w-sm text-sm">
+      <p className="max-w-[46ch] text-[13.5px] leading-[1.7]">
         Pilih provider + model di bawah, isi API key sendiri, atur reasoning Fast /
         Medium / High, upload gambar, lalu kirim pesan!
       </p>
-      <div className="mt-6 grid w-full max-w-2xl grid-cols-1 gap-2.5 sm:grid-cols-2">
+      <div className="mt-[18px] grid w-full max-w-[640px] grid-cols-1 gap-2.5 sm:grid-cols-2">
         {SUGGESTIONS.map((s) => (
           <button
             key={s.title}
             onClick={() => onPick(s.desc)}
-            className="glass glass-hover cursor-pointer rounded-2xl p-3.5 text-left"
+            className="glass glass-hover flex cursor-pointer gap-[11px] rounded-[var(--r)] p-[13px_14px] text-left"
           >
-            <p className="text-lg">{s.icon}</p>
-            <p className="mt-1 text-[13px] font-semibold text-[var(--ice)]">{s.title}</p>
-            <p className="text-xs text-[var(--muted)]">{s.desc}</p>
+            <span className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[10px] bg-[var(--accent-soft)] text-[17px]" aria-hidden>
+              {s.icon}
+            </span>
+            <span>
+              <b className="block text-[13px] text-[var(--ink)]">{s.title}</b>
+              <span className="text-xs leading-[1.55] text-[var(--muted)]">{s.desc}</span>
+            </span>
           </button>
         ))}
       </div>

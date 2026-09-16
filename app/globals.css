@@ -1,73 +1,156 @@
 @import "tailwindcss";
 
 /* ─────────────────────────────────────────────
-   Design tokens — disamakan dengan personal-web
-   Aksen cyan #00CFFF, default dark, terang via
-   class "light" di <html>.
+   Design tokens — redesign-v2 (3 preset di atas
+   bahasa yang sama: panel + orb + mono).
+   - komando: command-deck gelap, orb konik (default)
+   - senja:   plum ekspresif + aksen koral
+   - kertas:  terang, pesan AI model baris (rows)
+   Mode terang via class "light" di <html> bareng
+   class preset (anti-flicker di layout.tsx).
+   Display tetap Poppins, kode JetBrains Mono.
    ───────────────────────────────────────────── */
 :root {
-  /* ── Accent ── */
+  /* ── Accent (default = komando dark; applyAppearance /
+       themeInitScript menimpa secara inline) ── */
   --accent: #00cfff;
-  --accent-hover: rgba(0, 207, 255, 0.15);
-  --accent-glow: rgba(0, 207, 255, 0.28);
-  --accent-muted: rgba(0, 207, 255, 0.08);
+  --accent-soft: rgba(0, 207, 255, 0.12);
+  --accent-glow: rgba(0, 207, 255, 0.25);
+  --accent-ink: #08222c;
+
+  /* ── Skala dari panel Tampilan ── */
+  --fs: 14.5px;
+  --r: 14px;
 
   /* ── Gradient text ── */
-  --gradient-a: #00cfff;
+  --gradient-a: var(--accent);
   --gradient-b: #7c5cff;
 
-  /* ── Dark theme (default) ── */
-  --bg-light: #121212;
-  --bg-white: #1a1a1a;
-  --fg-dark: #f5f5f5;
-  --fg-mid: #cccccc;
-  --fg-muted: #888888;
-  --bg-dark: #0d0d0d;
-  --bg-dark-surface: #161616;
-  --fg-light: #f5f5f5;
-  --fg-muted-dark: #888888;
-  --border-light: rgba(255, 255, 255, 0.08);
-  --border-dark: rgba(255, 255, 255, 0.08);
-  --border-accent: rgba(0, 207, 255, 0.35);
+  /* ── komando dark (default) ── */
+  --bg: #0b0e12;
+  --panel: #0e1319;
+  --card: #141b24;
+  --ink: #f2f6f9;
+  --mid: #c9d2db;
+  --muted: #9aa6b2;
+  --surface: rgba(255, 255, 255, 0.055);
+  --surface2: rgba(255, 255, 255, 0.1);
+  --border: rgba(255, 255, 255, 0.09);
+  --code: #0c1116;
 
-  /* ── Aliases ala chatbot personal-web ── */
-  --blue-bg: var(--bg-light);
-  --blue-dark: var(--bg-white);
-  --blue-surface: var(--bg-white);
+  /* ── Aliases mengikuti aksen (custom accent ikut) ── */
+  --accent-hover: color-mix(in srgb, var(--accent) 15%, transparent);
+  --accent-muted: color-mix(in srgb, var(--accent) 8%, transparent);
+  --border-accent: color-mix(in srgb, var(--accent) 35%, transparent);
+
+  /* ── Aliases lama (kompat komponen) ── */
+  --blue-bg: var(--bg);
+  --blue-dark: var(--panel);
+  --blue-surface: var(--panel);
   --blue: var(--accent);
   --blue-hover: var(--accent-hover);
   --blue-glow: var(--accent-glow);
-  --blue-muted: var(--accent-muted);
-  --blue-ice: var(--fg-dark);
-  --ice: var(--fg-dark);
-  --muted: var(--fg-muted);
-  --bg: var(--bg-dark);
-  --surface: rgba(255, 255, 255, 0.05);
-  --surface-border: var(--border-light);
-  --surface-hover: rgba(255, 255, 255, 0.09);
+  --blue-muted: var(--accent-soft);
+  --blue-ice: var(--ink);
+  --ice: var(--ink);
+  --bg-light: var(--bg);
+  --bg-white: var(--panel);
+  --fg-dark: var(--ink);
+  --fg-mid: var(--mid);
+  --fg-muted: var(--muted);
+  --bg-dark: var(--bg);
+  --bg-dark-surface: var(--panel);
+  --fg-light: var(--ink);
+  --fg-muted-dark: var(--muted);
+  --border-light: var(--border);
+  --border-dark: var(--border);
+  --surface-border: var(--border);
+  --surface-hover: var(--surface2);
   --badge-bg: rgba(255, 255, 255, 0.14);
 }
 
-/* ── Light theme ── */
-.light {
-  --bg-light: #f3f6f0;
-  --bg-white: #ffffff;
-  --fg-dark: #0d0d0d;
-  --fg-mid: #2e2e2e;
-  --fg-muted: #4b5563;
-  --border-light: rgba(0, 0, 0, 0.09);
-  --border-dark: rgba(255, 255, 255, 0.09);
+/* ── Preset: nilai dark (default tiap preset) ── */
+.preset-komando {
+  --bg: #0b0e12;
+  --panel: #0e1319;
+  --card: #141b24;
+  --ink: #f2f6f9;
+  --mid: #c9d2db;
+  --muted: #9aa6b2;
+  --surface: rgba(255, 255, 255, 0.055);
+  --surface2: rgba(255, 255, 255, 0.1);
+  --border: rgba(255, 255, 255, 0.09);
+  --accent: #00cfff;
+  --code: #0c1116;
+}
+.preset-senja {
+  --bg: #140f1c;
+  --panel: #1a1326;
+  --card: #231a34;
+  --ink: #f8f1e9;
+  --mid: #d9cec2;
+  --muted: #ab9ebc;
+  --surface: rgba(255, 255, 255, 0.06);
+  --surface2: rgba(255, 255, 255, 0.11);
+  --border: rgba(255, 255, 255, 0.1);
+  --accent: #ff8a5c;
+  --code: #1c1226;
+}
+.preset-kertas {
+  --bg: #101210;
+  --panel: #151714;
+  --card: #1b1e1a;
+  --ink: #f0efe8;
+  --mid: #cfccc0;
+  --muted: #a3a097;
+  --surface: rgba(255, 255, 255, 0.055);
+  --surface2: rgba(255, 255, 255, 0.1);
+  --border: rgba(255, 255, 255, 0.09);
+  --accent: #3dd598;
+  --code: #0e120e;
+}
 
-  --blue-bg: var(--bg-light);
-  --blue-dark: var(--bg-white);
-  --blue-surface: var(--bg-white);
-  --blue-ice: var(--fg-dark);
-  --ice: var(--fg-dark);
-  --muted: var(--fg-muted);
-  --bg: var(--bg-light);
-  --surface: rgba(255, 255, 255, 0.75);
-  --surface-border: var(--border-light);
-  --surface-hover: rgba(255, 255, 255, 0.92);
+/* ── Preset: nilai light (class "light" di <html>) ── */
+.preset-komando.light {
+  --bg: #f2f5f7;
+  --panel: #ffffff;
+  --card: #ffffff;
+  --ink: #10151a;
+  --mid: #2b333b;
+  --muted: #5b6672;
+  --surface: rgba(16, 24, 32, 0.05);
+  --surface2: #ffffff;
+  --border: rgba(16, 24, 32, 0.1);
+  --accent: #008cb4;
+  --code: #101820;
+  --badge-bg: rgba(255, 255, 255, 0.85);
+}
+.preset-senja.light {
+  --bg: #fbf3ec;
+  --panel: #fffdf9;
+  --card: #ffffff;
+  --ink: #231a12;
+  --mid: #4a3f33;
+  --muted: #7d6f61;
+  --surface: rgba(35, 26, 18, 0.05);
+  --surface2: #ffffff;
+  --border: rgba(35, 26, 18, 0.11);
+  --accent: #e05b2b;
+  --code: #20140c;
+  --badge-bg: rgba(255, 255, 255, 0.85);
+}
+.preset-kertas.light {
+  --bg: #f6f4ee;
+  --panel: #ffffff;
+  --card: #ffffff;
+  --ink: #181510;
+  --mid: #33302a;
+  --muted: #6b655a;
+  --surface: rgba(24, 21, 16, 0.045);
+  --surface2: #ffffff;
+  --border: rgba(24, 21, 16, 0.12);
+  --accent: #0e7c5b;
+  --code: #101613;
   --badge-bg: rgba(255, 255, 255, 0.85);
 }
 
@@ -107,16 +190,66 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(0, 207, 255, 0.25);
+  background: color-mix(in srgb, var(--accent) 25%, transparent);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 207, 255, 0.45);
+  background: color-mix(in srgb, var(--accent) 45%, transparent);
 }
 
 *:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
+}
+
+/* ── Atmosfer: glow radial di belakang konten (ala mockup) ── */
+.app-atmos {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(480px 300px at 88% -60px, var(--accent-glow), transparent 65%),
+    radial-gradient(560px 380px at -80px 110%, rgba(124, 92, 255, 0.16), transparent 60%);
+}
+
+/* ── Orb: badge brand + avatar AI (conic gradient) ── */
+.orb {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  flex-shrink: 0;
+  background: conic-gradient(from 210deg, var(--accent), #7c5cff, var(--accent));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 17px;
+}
+.orb-lg {
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  font-size: 30px;
+  box-shadow: 0 14px 34px var(--accent-glow);
+}
+.avatar-ai {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 2px;
+  background: conic-gradient(from 210deg, var(--accent), #7c5cff, var(--accent));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+}
+html.preset-kertas .avatar-ai {
+  border-radius: 10px;
 }
 
 /* ── Glass / surface cards ── */
@@ -131,12 +264,12 @@ body {
 }
 .glass-hover:hover {
   background: var(--surface-hover);
-  border-color: rgba(0, 207, 255, 0.35);
+  border-color: var(--border-accent);
   transform: translateY(-3px);
-  box-shadow: 0 12px 36px rgba(0, 207, 255, 0.1);
+  box-shadow: 0 12px 36px var(--accent-glow);
 }
 
-/* ── Logo badge ── */
+/* ── Logo badge (lama, dipertahankan untuk kompat) ── */
 .logo-badge {
   width: 38px;
   height: 38px;
@@ -229,10 +362,117 @@ body {
   animation-delay: 0.3s;
 }
 
+/* ── Baris pesan + bubble (hook: .msg-row / .bub-*) ── */
+.msg-row {
+  letter-spacing: 0.002em;
+}
+.density-compact .msg-row {
+  margin-bottom: 10px !important;
+}
+.density-compact .bub-user,
+.density-compact .bub-ai {
+  padding: 8px 11px !important;
+}
+
+/* Kepala pesan AI: nama + meta mono + tombol salin (ala mockup) */
+.mhead {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-size: 11.5px;
+  color: var(--muted);
+}
+.mhead b {
+  color: var(--ink);
+  font-size: 12.5px;
+}
+.mhead .mono {
+  font-family: var(--font-jetbrains-mono), ui-monospace, monospace;
+  font-size: 10.5px;
+}
+.mhead .cp {
+  margin-left: auto;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  border-radius: 7px;
+  font: 600 10.5px var(--font-poppins), sans-serif;
+  padding: 3px 8px;
+  cursor: pointer;
+}
+.mhead .cp:hover {
+  color: var(--ink);
+  background: var(--surface2);
+}
+
+/* ── Blok kode dengan header (traffic dots + tombol salin) ── */
+.codeblock {
+  background: var(--code);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--r) - 2px);
+  margin: 0.7em 0 0.3em;
+  overflow: hidden;
+}
+.codeblock header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+}
+.codeblock .tdots {
+  display: flex;
+  gap: 5px;
+}
+.codeblock .tdots i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: block;
+}
+.codeblock header span.fname {
+  font: 500 11px var(--font-jetbrains-mono), ui-monospace, monospace;
+  color: #9fb3c8;
+}
+.codeblock header button {
+  margin-left: auto;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: transparent;
+  color: #c8d4e0;
+  border-radius: 7px;
+  font: 600 10.5px var(--font-poppins), sans-serif;
+  padding: 3px 9px;
+  cursor: pointer;
+}
+.codeblock header button:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+.codeblock pre {
+  margin: 0 !important;
+  padding: 12px 14px;
+  overflow-x: auto;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  font: 400 12.5px/1.7 var(--font-jetbrains-mono), ui-monospace, monospace !important;
+  color: #e6edf3;
+}
+
+/* ── Preset Kertas: pesan AI model baris, tanpa bubble ── */
+html.preset-kertas .bub-ai {
+  background: transparent !important;
+  border: 0 !important;
+  border-top: 1px solid var(--border) !important;
+  border-radius: 0 !important;
+  padding: 14px 2px 2px !important;
+  max-width: 100% !important;
+}
+
 /* ── Markdown di bubble AI ── */
 .prose-ai {
-  font-size: 0.875rem;
-  line-height: 1.625;
+  font-size: var(--fs, 0.875rem);
+  line-height: 1.7;
 }
 .prose-ai pre {
   background: #0d1117;
@@ -260,6 +500,9 @@ body {
 .prose-ai ol {
   list-style: decimal;
 }
+.prose-ai li::marker {
+  color: var(--accent);
+}
 .prose-ai h1,
 .prose-ai h2,
 .prose-ai h3,
@@ -283,6 +526,32 @@ body {
 .prose-ai td {
   border: 1px solid var(--surface-border);
   padding: 0.35rem 0.6rem;
+}
+
+/* ── Panel composer (ala mockup) ── */
+.chat-panel {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  border-radius: calc(var(--r) + 4px);
+  padding: 6px 10px 10px;
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.18);
+}
+.chat-panel:focus-within {
+  border-color: var(--accent);
+}
+.chat-hr {
+  height: 1px;
+  background: var(--border);
+  margin: 0 2px 8px;
+}
+.bdg {
+  font-size: 10.5px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-radius: 6px;
+  padding: 1px 6px;
+  font-weight: 700;
+  white-space: nowrap;
 }
 
 @media (prefers-reduced-motion: reduce) {

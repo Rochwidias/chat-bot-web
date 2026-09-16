@@ -33,20 +33,20 @@ export default function ApiKeyModal({ open, provider, keys, customBaseUrl, onClo
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4" onClick={onClose}>
       <div
-        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-[var(--surface-border)] bg-[var(--bg)] p-5 shadow-2xl"
+        className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-[var(--border)] bg-[var(--bg)] p-5 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-1 flex items-center justify-between">
-          <h2 className="text-base font-bold text-[var(--ice)]">🔑 API Key Sendiri (BYOK)</h2>
+          <h2 className="text-base font-bold text-[var(--ink)]">🔑 API Key Sendiri (BYOK)</h2>
           <button
             onClick={onClose}
-            className="cursor-pointer rounded-lg px-2 py-1 text-[var(--muted)] hover:bg-[var(--surface)] hover:text-[var(--ice)]"
+            className="cursor-pointer rounded-lg px-2 py-1 text-[var(--muted)] hover:bg-[var(--surface)] hover:text-[var(--ink)]"
           >
             ✕
           </button>
         </div>
         <p className="mb-4 text-xs leading-relaxed text-[var(--muted)]">
-          Tempel key dari provider favoritmu. Key <b className="text-[var(--ice)]">hanya disimpan di browser ini</b>,
+          Tempel key dari provider favoritmu. Key <b className="text-[var(--ink)]">hanya disimpan di browser ini</b>,
           diteruskan langsung ke provider lewat route <code>api/chat</code>.
         </p>
 
@@ -56,15 +56,15 @@ export default function ApiKeyModal({ open, provider, keys, customBaseUrl, onClo
               key={p.id}
               className={`rounded-xl border p-3 ${
                 p.id === provider
-                  ? "border-[var(--border-accent)] bg-[var(--blue-muted)]"
-                  : "border-[var(--surface-border)] bg-[var(--surface)]"
+                  ? "border-[var(--border-accent)] bg-[var(--accent-soft)]"
+                  : "border-[var(--border)] bg-[var(--surface)]"
               }`}
             >
               <div className="mb-1.5 flex items-center justify-between">
-                <p className="text-[13px] font-semibold text-[var(--ice)]">
-                  {p.label} {p.id === provider && <span className="text-[10px] text-[var(--blue)]">● aktif</span>}
+                <p className="text-[13px] font-semibold text-[var(--ink)]">
+                  {p.label} {p.id === provider && <span className="text-[10px] text-[var(--accent)]">● aktif</span>}
                 </p>
-                <a href={p.docsUrl} target="_blank" rel="noreferrer" className="text-[11px] text-[var(--blue)] hover:underline">
+                <a href={p.docsUrl} target="_blank" rel="noreferrer" className="text-[11px] text-[var(--accent)] hover:underline">
                   ambil key ↗
                 </a>
               </div>
@@ -76,11 +76,11 @@ export default function ApiKeyModal({ open, provider, keys, customBaseUrl, onClo
                   // trim dilakukan sekali saat Simpan.
                   onChange={(e) => setDraft({ ...draft, [p.id]: e.target.value })}
                   placeholder={p.keyPlaceholder}
-                  className="min-w-0 flex-1 rounded-lg border border-[var(--surface-border)] bg-[var(--bg)] px-2.5 py-1.5 font-mono text-xs text-[var(--ice)] outline-none placeholder:text-[var(--muted)] focus:border-[var(--blue)]"
+                  className="min-w-0 flex-1 rounded-lg border border-[var(--border)] bg-[var(--bg)] px-2.5 py-1.5 font-mono text-xs text-[var(--ink)] outline-none placeholder:text-[var(--muted)] focus:border-[var(--accent)]"
                 />
                 <button
                   onClick={() => setShow({ ...show, [p.id]: !show[p.id] })}
-                  className="cursor-pointer rounded-lg border border-[var(--surface-border)] px-2 text-xs text-[var(--muted)] hover:bg-[var(--surface-hover)] hover:text-[var(--ice)]"
+                  className="cursor-pointer rounded-lg border border-[var(--border)] px-2 text-xs text-[var(--muted)] hover:bg-[var(--surface2)] hover:text-[var(--ink)]"
                 >
                   {show[p.id] ? "🙈" : "👁"}
                 </button>
@@ -89,13 +89,13 @@ export default function ApiKeyModal({ open, provider, keys, customBaseUrl, onClo
             </div>
           ))}
 
-          <div className="rounded-xl border border-[var(--surface-border)] bg-[var(--surface)] p-3">
-            <p className="mb-1.5 text-[13px] font-semibold text-[var(--ice)]">Custom Base URL</p>
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-3">
+            <p className="mb-1.5 text-[13px] font-semibold text-[var(--ink)]">Custom Base URL</p>
             <input
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               placeholder="http://localhost:11434/v1 (kosongkan bila tak dipakai)"
-              className="w-full rounded-lg border border-[var(--surface-border)] bg-[var(--bg)] px-2.5 py-1.5 font-mono text-xs text-[var(--ice)] outline-none placeholder:text-[var(--muted)] focus:border-[var(--blue)]"
+              className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg)] px-2.5 py-1.5 font-mono text-xs text-[var(--ink)] outline-none placeholder:text-[var(--muted)] focus:border-[var(--accent)]"
             />
           </div>
         </div>
@@ -103,7 +103,7 @@ export default function ApiKeyModal({ open, provider, keys, customBaseUrl, onClo
         <div className="mt-4 flex gap-2">
           <button
             onClick={onClose}
-            className="flex-1 cursor-pointer rounded-xl border border-[var(--surface-border)] px-4 py-2 text-sm text-[var(--muted)] hover:bg-[var(--surface)] hover:text-[var(--ice)]"
+            className="flex-1 cursor-pointer rounded-xl border border-[var(--border)] px-4 py-2 text-sm text-[var(--muted)] hover:bg-[var(--surface)] hover:text-[var(--ink)]"
           >
             Batal
           </button>
@@ -118,7 +118,7 @@ export default function ApiKeyModal({ open, provider, keys, customBaseUrl, onClo
               onSave(cleaned, url.trim());
               onClose();
             }}
-            className="flex-1 cursor-pointer rounded-xl bg-[var(--blue)] px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
+            className="flex-1 cursor-pointer rounded-xl bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-[var(--accent-ink)] hover:opacity-90"
           >
             Simpan Key
           </button>

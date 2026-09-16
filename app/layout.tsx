@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Poppins, JetBrains_Mono } from "next/font/google";
+import { themeInitScript } from "@/lib/theme";
 import "./globals.css";
 
 const poppins = Poppins({
@@ -25,17 +26,15 @@ export const viewport: Viewport = {
   colorScheme: "dark",
 };
 
-// Anti-flicker: samakan dengan personal-web — default dark,
-// class "light" di <html> berarti mode terang.
-const themeInitScript = `(function(){try{var t=localStorage.getItem("cbw.settings.v1");var theme=t?JSON.parse(t).theme:"dark";if(theme==="light"){document.documentElement.classList.add("light")}else{document.documentElement.classList.remove("light")}}catch(e){}})();`;
-
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="id" suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+        {/* Anti-flicker: pasang class preset/mode + var aksen SEBELUM paint.
+            Sumber tunggal di lib/theme.ts (lihat panduan preventing-flash). */}
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript() }} />
       </head>
       <body
         className={`${poppins.variable} ${jetbrainsMono.variable} min-h-full antialiased`}

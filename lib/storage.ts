@@ -6,11 +6,18 @@ import {
   type ProviderId,
 } from "./types";
 import type { ModelOption } from "./providers";
+import {
+  DEFAULT_APPEARANCE,
+  normalizeAppearance,
+  type AppearanceSettings,
+  type ThemeMode,
+} from "./theme";
 
 const K_SESSIONS = "cbw.sessions.v1";
 const K_KEYS = "cbw.keys.v1";
 const K_SETTINGS = "cbw.settings.v1";
 const K_MODELS = "cbw.models.v1";
+const K_THEME = "cbw.theme.v1";
 
 /** Cache daftar model per provider: { at: timestamp, models } */
 export type ModelsCache = Partial<
@@ -78,6 +85,34 @@ export function saveKeys(keys: ProviderKeys): void {
   if (typeof window === "undefined") return;
   try {
     localStorage.setItem(K_KEYS, JSON.stringify(keys));
+  } catch {
+    /* abaikan */
+  }
+}
+
+// ---------- Appearance (Settings → Tampilan, redesign-v2) ----------
+/**
+ * Muat appearance. Fallback mode dari settings lama (cbw.settings.v1.theme)
+ * agar user lama tidak kaget pindah mode saat update.
+ */
+export function loadAppearance(fallbackMode?: ThemeMode): AppearanceSettings {
+  if (typeof window === "undefined") return DEFAULT_APPEARANCE;
+  const raw = safeParse<Partial<AppearanceSettings> | null>(
+    localStorage.getItem(K_THEME),
+    null
+  );
+  let fb = fallbackMode;
+  if (!fb) {
+    const s = safeParse<Partial<AppSettings>>(localStorage.getItem(K_SETTINGS), {});
+    if (s.theme === "light" || s.theme === "dark") fb = s.theme;
+  }
+  return normalizeAppearance(raw, fb);
+}
+
+export function saveAppearance(a: AppearanceSettings): void {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(K_THEME, JSON.stringify(a));
   } catch {
     /* abaikan */
   }
