@@ -19,8 +19,12 @@ export function useDismissible(
   const ref = useRef<HTMLDivElement>(null);
   const closeRef = useRef(onClose);
   const resetRef = useRef(options?.reset);
-  closeRef.current = onClose;
-  resetRef.current = options?.reset;
+
+  // Tulis ref di dalam efek (bukan saat render) — aturan react-hooks/refs.
+  useEffect(() => {
+    closeRef.current = onClose;
+    resetRef.current = options?.reset;
+  });
 
   useEffect(() => {
     if (!open) return;

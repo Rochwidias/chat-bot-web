@@ -4,6 +4,7 @@ import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { ChatMessage } from "@/lib/types";
+import { CopyIcon, LogoIcon } from "./icons";
 
 interface Props {
   msg: ChatMessage;
@@ -31,16 +32,19 @@ export default function ChatBubble({ msg, modelLabel }: Props) {
   return (
     <div className={`msg-row mb-[18px] flex gap-2.5 ${isUser ? "justify-end" : "justify-start"}`}>
       {!isUser && (
-        <div className="avatar-ai" aria-hidden>✦</div>
+        <div className="avatar-ai" aria-hidden>
+          <LogoIcon size={16} />
+        </div>
       )}
       <div className={`min-w-0 ${isUser ? "max-w-[78%]" : "max-w-[82%]"}`}>
-        {/* Kepala pesan AI ala mockup: nama + model mono + tombol salin */}
+        {/* Kepala pesan AI: nama + model mono + tombol salin */}
         {!isUser && (
           <div className="mhead">
             <b>Asisten</b>
             <span className="mono">{modelLabel ?? ""}{modelLabel ? ` · ${time}` : time}</span>
-            <button className="cp" onClick={copy}>
-              {copied ? "✅ Tersalin" : "Salin"}
+            <button className="cp inline-flex items-center gap-1" onClick={copy}>
+              <CopyIcon size={12} />
+              {copied ? "Tersalin" : "Salin"}
             </button>
           </div>
         )}
@@ -98,13 +102,14 @@ export default function ChatBubble({ msg, modelLabel }: Props) {
                   pre: ({ children }: { children?: React.ReactNode }) => (
                     <div className="codeblock">
                       <header>
-                        <span className="tdots" aria-hidden>
-                          <i style={{ background: "#ff5f57" }} />
-                          <i style={{ background: "#febc2e" }} />
-                          <i style={{ background: "#28c840" }} />
-                        </span>
                         <span className="fname">code</span>
-                        <button onClick={copy}>{copied ? "✅ Tersalin" : "Salin"}</button>
+                        <button
+                          className="inline-flex items-center gap-1"
+                          onClick={copy}
+                        >
+                          <CopyIcon size={12} />
+                          {copied ? "Tersalin" : "Salin"}
+                        </button>
                       </header>
                       <pre>{children}</pre>
                     </div>

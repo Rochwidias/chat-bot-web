@@ -150,13 +150,14 @@ export function reasoningSystemHint(level: ReasoningLevel): string {
   return "Jawablah dengan seimbang dalam Bahasa Indonesia: jelas, cukup detail, dan terstruktur bila perlu.";
 }
 
+/** Meta label + deskripsi per level reasoning (ikon digambar di components/icons.tsx). */
 export const REASONING_META: Record<
   ReasoningLevel,
-  { label: string; icon: string; desc: string }
+  { label: string; desc: string }
 > = {
-  fast: { label: "Fast", icon: "⚡", desc: "Cepat & hemat, untuk tanya ringan" },
-  medium: { label: "Medium", icon: "⚖️", desc: "Seimbang (default)" },
-  high: { label: "High", icon: "🧠", desc: "Mikir dalam, lambat tapi akurat" },
+  fast: { label: "Fast", desc: "Cepat & hemat, untuk tanya ringan" },
+  medium: { label: "Medium", desc: "Seimbang (default)" },
+  high: { label: "High", desc: "Mikir dalam, lambat tapi akurat" },
 };
 
 /** Daftar model live dari provider via route /api/models (server-side proxy). */

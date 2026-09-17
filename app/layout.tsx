@@ -16,14 +16,14 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ChatBot Web — AI Dashboard",
+  title: "RuangTanya — BYOK Chat",
   description:
-    "Chatbot multi-provider (BYOK): tempel API key sendiri, pilih model, atur reasoning Fast/Medium/High, kirim gambar + teks.",
+    "RuangTanya: chatbot multi-provider (BYOK): tempel API key sendiri, pilih model, atur reasoning Fast/Medium/High, kirim gambar + teks.",
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0D0D0D",
-  colorScheme: "dark",
+  themeColor: "#0e0f11",
+  colorScheme: "dark light",
 };
 
 export default function RootLayout({

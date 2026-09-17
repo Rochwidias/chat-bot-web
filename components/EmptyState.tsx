@@ -1,16 +1,20 @@
 "use client";
 
+import { BulbIcon, CodeIcon, CpuIcon, ImageIcon, LogoIcon } from "./icons";
+
 const SUGGESTIONS = [
-  { icon: "💡", title: "Jelaskan konsep", desc: "mis. 'Jelaskan API dengan simpel'" },
-  { icon: "💻", title: "Bantu coding", desc: "mis. 'Buatkan fetch streaming di JS'" },
-  { icon: "🖼️", title: "Analisa gambar", desc: "upload gambar + tanya isinya" },
-  { icon: "🧠", title: "High reasoning", desc: "ubah ke High untuk soal sulit" },
+  { Icon: BulbIcon, title: "Jelaskan konsep", desc: "mis. 'Jelaskan API dengan simpel'" },
+  { Icon: CodeIcon, title: "Bantu coding", desc: "mis. 'Buatkan fetch streaming di JS'" },
+  { Icon: ImageIcon, title: "Analisa gambar", desc: "upload gambar + tanya isinya" },
+  { Icon: CpuIcon, title: "High reasoning", desc: "ubah ke High untuk soal sulit" },
 ];
 
 export default function EmptyState({ onPick }: { onPick: (text: string) => void }) {
   return (
     <div className="flex h-full flex-col items-center justify-center px-4 py-8 text-center text-[var(--muted)]">
-      <div className="orb orb-lg mb-3" aria-hidden>🤖</div>
+      <div className="logo-mark logo-mark-lg mb-3" aria-hidden>
+        <LogoIcon size={28} />
+      </div>
       <h2 className="font-display mb-1 text-[19px] font-bold text-[var(--ink)]">
         Mulai ngobrol dengan AI
       </h2>
@@ -23,10 +27,10 @@ export default function EmptyState({ onPick }: { onPick: (text: string) => void 
           <button
             key={s.title}
             onClick={() => onPick(s.desc)}
-            className="glass glass-hover flex cursor-pointer gap-[11px] rounded-[var(--r)] p-[13px_14px] text-left"
+            className="glass flex cursor-pointer gap-[11px] rounded-[var(--r)] p-[13px_14px] text-left transition-colors hover:border-[var(--border-accent)]"
           >
-            <span className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[10px] bg-[var(--accent-soft)] text-[17px]" aria-hidden>
-              {s.icon}
+            <span className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[10px] bg-[var(--accent-soft)] text-[var(--accent)]" aria-hidden>
+              <s.Icon size={18} />
             </span>
             <span>
               <b className="block text-[13px] text-[var(--ink)]">{s.title}</b>

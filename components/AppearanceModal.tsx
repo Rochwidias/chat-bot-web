@@ -14,6 +14,7 @@ import {
   type ThemeMode,
   type ThemePresetId,
 } from "@/lib/theme";
+import { SettingsIcon, XIcon } from "./icons";
 
 interface Props {
   open: boolean;
@@ -88,15 +89,16 @@ export default function AppearanceModal({ open, value, onChange, onPreset, onMod
         aria-label="Pengaturan tampilan"
       >
         <div className="mb-1 flex items-center justify-between">
-          <h2 className="text-base font-bold text-[var(--ink)]">
-            ⚙️ Pengaturan Tampilan
+          <h2 className="inline-flex items-center gap-2 text-base font-bold text-[var(--ink)]">
+            <SettingsIcon size={17} />
+            Pengaturan Tampilan
           </h2>
           <button
             onClick={onClose}
-            className="cursor-pointer rounded-lg px-2 py-1 text-[var(--muted)] hover:bg-[var(--surface)] hover:text-[var(--ink)]"
+            className="cursor-pointer rounded-lg p-1.5 text-[var(--muted)] hover:bg-[var(--surface)] hover:text-[var(--ink)]"
             aria-label="Tutup pengaturan"
           >
-            ✕
+            <XIcon size={16} />
           </button>
         </div>
         <p className="mb-4 text-xs leading-relaxed text-[var(--muted)]">
@@ -176,8 +178,8 @@ export default function AppearanceModal({ open, value, onChange, onPreset, onMod
             <Seg<ThemeMode>
               label="Mode"
               options={[
-                { id: "dark", label: "🌙 Gelap" },
-                { id: "light", label: "☀️ Terang" },
+                { id: "dark", label: "Gelap" },
+                { id: "light", label: "Terang" },
               ]}
               active={value.mode}
               onPick={onMode}

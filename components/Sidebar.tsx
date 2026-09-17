@@ -1,6 +1,7 @@
 "use client";
 
 import type { ChatSession } from "@/lib/types";
+import { ChatIcon, KeyIcon, LogoIcon, PlusIcon, TrashIcon } from "./icons";
 
 interface Props {
   sessions: ChatSession[];
@@ -34,16 +35,17 @@ export default function Sidebar({ sessions, activeId, provider, model, modelCoun
       >
         <div className="p-4">
           <div className="mb-4 flex items-center gap-2.5 px-1">
-            <div className="orb" aria-hidden>✦</div>
+            <div className="logo-mark" aria-hidden>
+              <LogoIcon size={20} />
+            </div>
             <div>
-              <p className="font-display text-sm font-bold text-[var(--ink)]">ChatBot Web</p>
-              <p className="text-[11px] text-[var(--muted)]">AI Dashboard • BYOK</p>
+              <p className="font-display text-sm font-bold text-[var(--ink)]">RuangTanya</p>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">BYOK Chat</p>
             </div>
           </div>
-          {/* Status provider ala mockup: livedot + nama + model mono + chip key */}
+          {/* Status provider: nama + model mono + chip key */}
           <div className="mb-3 rounded-[var(--r)] border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-xs">
             <div className="flex items-center gap-1.5">
-              <span className="h-2 w-2 shrink-0 animate-pulse rounded-full bg-emerald-400" aria-hidden />
               <b className="text-[12.5px] text-[var(--ink)]">{provider}</b>
               <span className="ml-auto font-mono text-[10.5px] text-[var(--muted)]">v1</span>
             </div>
@@ -52,13 +54,12 @@ export default function Sidebar({ sessions, activeId, provider, model, modelCoun
             </p>
             <div className="flex items-center gap-2">
               <span
-                className={`rounded-full border px-2 py-0.5 text-[11px] font-bold ${
-                  hasKey
-                    ? "border-emerald-400/30 bg-emerald-500/10 text-emerald-300"
-                    : "border-yellow-400/30 bg-yellow-500/10 text-yellow-200"
+                className={`inline-flex items-center gap-1 text-[11px] font-semibold ${
+                  hasKey ? "text-[var(--muted)]" : "text-[var(--accent)]"
                 }`}
               >
-                {hasKey ? "🟢 Key OK" : "🔑 Isi Key"}
+                <KeyIcon size={12} />
+                {hasKey ? "Key OK" : "Isi Key"}
               </span>
               <span className="ml-auto font-mono text-[10.5px] text-[var(--muted)]">
                 {modelCount} model
@@ -70,9 +71,10 @@ export default function Sidebar({ sessions, activeId, provider, model, modelCoun
               onNew();
               onClose();
             }}
-            className="btn-shine w-full rounded-xl bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-[var(--accent-ink)] transition hover:opacity-90 active:scale-[0.98]"
+            className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-[var(--accent)] px-4 py-2.5 text-sm font-semibold text-[var(--accent-ink)] transition hover:opacity-90 active:scale-[0.98]"
           >
-            + Chat Baru
+            <PlusIcon size={16} />
+            Chat Baru
           </button>
         </div>
 
@@ -84,7 +86,7 @@ export default function Sidebar({ sessions, activeId, provider, model, modelCoun
             <p className="px-2 text-xs leading-relaxed text-[var(--muted)]">
               Belum ada riwayat.
               <br />
-              Klik <b className="text-[var(--ink)]">+ Chat Baru</b> untuk mulai.
+              Klik <b className="text-[var(--ink)]">Chat Baru</b> untuk mulai.
             </p>
           )}
           <ul className="space-y-1">
@@ -106,19 +108,21 @@ export default function Sidebar({ sessions, activeId, provider, model, modelCoun
                           onSelect(s.id);
                           onClose();
                         }}
-                        className="min-w-0 flex-1 truncate text-left font-medium"
+                        className="inline-flex min-w-0 flex-1 items-center gap-1.5 truncate text-left font-medium"
                         title={s.title}
                       >
-                        <span className="mr-1.5">💬</span>
-                        {s.title}
+                        <span className="shrink-0 text-[var(--muted)]">
+                          <ChatIcon size={14} />
+                        </span>
+                        <span className="min-w-0 flex-1 truncate">{s.title}</span>
                       </button>
                       <button
                         onClick={() => onDelete(s.id)}
                         title="Hapus chat"
                         aria-label={`Hapus chat ${s.title}`}
-                        className="rounded-md px-1.5 py-0.5 text-[var(--muted)] transition hover:bg-red-500/10 hover:text-red-400 focus-visible:opacity-100 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100"
+                        className="rounded-md p-1 text-[var(--muted)] transition hover:bg-red-500/10 hover:text-red-400 focus-visible:opacity-100 md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100"
                       >
-                        🗑
+                        <TrashIcon size={15} />
                       </button>
                     </div>
                     <p className="mt-0.5 pl-6 font-mono text-[10.5px] text-[var(--muted)]">
@@ -131,10 +135,11 @@ export default function Sidebar({ sessions, activeId, provider, model, modelCoun
           </ul>
         </div>
 
-        <div className="border-t border-[var(--border)] p-3 text-[11px] leading-relaxed text-[var(--muted)]">
-          🔑 Key tersimpan di browser abang saja.
-          <br />
-          Tidak dikirim ke server lain selain provider.
+        <div className="flex items-start gap-1.5 border-t border-[var(--border)] p-3 text-[11px] leading-relaxed text-[var(--muted)]">
+          <span className="mt-0.5 shrink-0">
+            <KeyIcon size={13} />
+          </span>
+          <span>Key tersimpan di browser saja. Tidak dikirim ke server lain selain provider.</span>
         </div>
       </aside>
     </>

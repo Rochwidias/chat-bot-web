@@ -8,6 +8,7 @@ import ChatInput from "@/components/ChatInput";
 import ApiKeyModal from "@/components/ApiKeyModal";
 import AppearanceModal from "@/components/AppearanceModal";
 import EmptyState from "@/components/EmptyState";
+import { AlertIcon } from "@/components/icons";
 import { getProvider, loadRemoteModels, supportsVision } from "@/lib/providers";
 import {
   applyAppearance,
@@ -288,7 +289,7 @@ export default function ChatPage() {
           patchMessages(targetId, (msgs) =>
             msgs.map((m) =>
               m.id === aiMsg.id
-                ? { ...m, content: m.content + "\n\n⏹ *Dihentikan oleh user.*" }
+                ? { ...m, content: m.content + "\n\n*Dihentikan oleh user.*" }
                 : m
             )
           );
@@ -297,7 +298,7 @@ export default function ChatPage() {
           setError(msg);
           patchMessages(targetId, (msgs) =>
             msgs.map((m) =>
-              m.id === aiMsg.id ? { ...m, content: `⚠️ ${msg}` } : m
+              m.id === aiMsg.id ? { ...m, content: `Error: ${msg}` } : m
             )
           );
         }
@@ -388,7 +389,6 @@ export default function ChatPage() {
 
   return (
     <div className="relative flex h-screen overflow-hidden bg-[var(--bg)] text-[var(--ink)]">
-      <div className="app-atmos" aria-hidden />
       <Sidebar
         sessions={sessions}
         activeId={effectiveId}
@@ -423,8 +423,9 @@ export default function ChatPage() {
         />
 
         {error && (
-          <div className="border-b border-red-400/30 bg-red-500/10 px-4 py-2 text-xs text-red-300">
-            ⚠️ {error}
+          <div className="flex items-center gap-1.5 border-b border-red-400/30 bg-red-500/10 px-4 py-2 text-xs text-red-300">
+            <AlertIcon size={13} />
+            {error}
           </div>
         )}
 

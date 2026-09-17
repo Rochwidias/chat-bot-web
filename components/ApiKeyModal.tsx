@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { PROVIDERS } from "@/lib/providers";
 import type { ProviderId, ProviderKeys } from "@/lib/types";
+import { CheckIcon, EyeIcon, EyeOffIcon, KeyIcon, XIcon } from "./icons";
 
 interface Props {
   open: boolean;
@@ -17,16 +18,18 @@ export default function ApiKeyModal({ open, provider, keys, customBaseUrl, onClo
   const [draft, setDraft] = useState<ProviderKeys>(keys);
   const [url, setUrl] = useState(customBaseUrl);
   const [show, setShow] = useState<Record<string, boolean>>({});
+  const [wasOpen, setWasOpen] = useState(open);
 
   // Sinkronkan draft dari props tiap modal dibuka (komponen tetap mounted
   // saat tertutup, jadi state lama bisa basi dan tersimpan ulang).
-  useEffect(() => {
-    if (open) {
-      setDraft(keys);
-      setUrl(customBaseUrl);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+  // Penyesuaian saat render (pola derived-state resmi React), bukan di efek.
+  if (open && !wasOpen) {
+    setWasOpen(true);
+    setDraft(keys);
+    setUrl(customBaseUrl);
+  } else if (!open && wasOpen) {
+    setWasOpen(false);
+  }
 
   if (!open) return null;
 
@@ -37,12 +40,16 @@ export default function ApiKeyModal({ open, provider, keys, customBaseUrl, onClo
         onClick={(e) => e.stopPropagation()}
       >
         <div className="mb-1 flex items-center justify-between">
-          <h2 className="text-base font-bold text-[var(--ink)]">🔑 API Key Sendiri (BYOK)</h2>
+          <h2 className="inline-flex items-center gap-2 text-base font-bold text-[var(--ink)]">
+            <KeyIcon size={17} />
+            API Key Sendiri (BYOK)
+          </h2>
           <button
             onClick={onClose}
-            className="cursor-pointer rounded-lg px-2 py-1 text-[var(--muted)] hover:bg-[var(--surface)] hover:text-[var(--ink)]"
+            className="cursor-pointer rounded-lg p-1.5 text-[var(--muted)] hover:bg-[var(--surface)] hover:text-[var(--ink)]"
+            aria-label="Tutup"
           >
-            ✕
+            <XIcon size={16} />
           </button>
         </div>
         <p className="mb-4 text-xs leading-relaxed text-[var(--muted)]">
@@ -61,8 +68,8 @@ export default function ApiKeyModal({ open, provider, keys, customBaseUrl, onClo
               }`}
             >
               <div className="mb-1.5 flex items-center justify-between">
-                <p className="text-[13px] font-semibold text-[var(--ink)]">
-                  {p.label} {p.id === provider && <span className="text-[10px] text-[var(--accent)]">● aktif</span>}
+                <p className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[var(--ink)]">
+                  {p.label} {p.id === provider && <span className="text-[10px] text-[var(--accent)]">aktif</span>}
                 </p>
                 <a href={p.docsUrl} target="_blank" rel="noreferrer" className="text-[11px] text-[var(--accent)] hover:underline">
                   ambil key ↗
@@ -80,9 +87,11 @@ export default function ApiKeyModal({ open, provider, keys, customBaseUrl, onClo
                 />
                 <button
                   onClick={() => setShow({ ...show, [p.id]: !show[p.id] })}
-                  className="cursor-pointer rounded-lg border border-[var(--border)] px-2 text-xs text-[var(--muted)] hover:bg-[var(--surface2)] hover:text-[var(--ink)]"
+                  className="cursor-pointer rounded-lg border border-[var(--border)] p-1.5 text-[var(--muted)] hover:bg-[var(--surface2)] hover:text-[var(--ink)]"
+                  title={show[p.id] ? "Sembunyikan" : "Tampilkan"}
+                  aria-label={show[p.id] ? "Sembunyikan key" : "Tampilkan key"}
                 >
-                  {show[p.id] ? "🙈" : "👁"}
+                  {show[p.id] ? <EyeOffIcon size={15} /> : <EyeIcon size={15} />}
                 </button>
               </div>
               <p className="mt-1 text-[11px] text-[var(--muted)]">{p.keyHint}</p>
@@ -118,8 +127,9 @@ export default function ApiKeyModal({ open, provider, keys, customBaseUrl, onClo
               onSave(cleaned, url.trim());
               onClose();
             }}
-            className="flex-1 cursor-pointer rounded-xl bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-[var(--accent-ink)] hover:opacity-90"
+            className="inline-flex flex-1 cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-[var(--accent)] px-4 py-2 text-sm font-semibold text-[var(--accent-ink)] hover:opacity-90"
           >
+            <CheckIcon size={15} />
             Simpan Key
           </button>
         </div>

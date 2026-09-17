@@ -1,13 +1,14 @@
 /**
- * Tema tampilan (Settings → Tampilan) — hasil implementasi mockup redesign-v2.
- * Tiga preset beda kepribadian di atas bahasa yang sama (panel + orb + mono):
- * - komando: command-deck gelap, presisi, orb konik (default, evolusi aman)
- * - senja:   plum ekspresif + aksen koral, mesh senja (paling berani)
- * - kertas:  terang dulu, pesan AI model baris tanpa bubble (paling tenang)
+ * Tema tampilan (Settings → Tampilan) — sistem Ink premium:
+ * - Malam Ink (gelap #0E0F11 + aksen mint #3DDC84)
+ * - Kertas Ink (terang #FAFAF7 + aksen pine #0B6E4F)
+ * Tiga preset memakai bahasa yang sama (panel flat + mono);
+ * komando & kertas berbagi sistem Ink (dark = Malam, light = Kertas),
+ * senja tetap sebagai alternatif ekspresif.
  *
  * Struktur & props komponen tetap sama; yang berubah hanya token warna +
  * layout via CSS variables. Display tetap Poppins (tanpa font baru),
- * kode tetap JetBrains Mono.
+ * kode tetap JetBrains Mono. Ikon: SVG custom tipis 1.8px, tanpa emoji.
  */
 
 export type ThemePresetId = "komando" | "senja" | "kertas";
@@ -55,42 +56,42 @@ interface PresetDef {
 export const PRESETS: PresetDef[] = [
   {
     id: "komando",
-    name: "A · Komando Cyan",
-    desc: "Command-deck gelap, presisi, orb konik. Evolusi aman dari desain sekarang.",
-    dots: ["#0b0e12", "#00cfff", "#7c5cff"],
+    name: "Malam Ink",
+    desc: "Tinta gelap premium, satu aksen daun. Pilihan utama.",
+    dots: ["#0e0f11", "#3ddc84", "#edebe6"],
     defaultMode: "dark",
     rows: false,
     dark: {
-      "--bg": "#0b0e12",
-      "--panel": "#0e1319",
-      "--card": "#141b24",
-      "--ink": "#f2f6f9",
-      "--mid": "#c9d2db",
-      "--muted": "#9aa6b2",
+      "--bg": "#0e0f11",
+      "--panel": "#141619",
+      "--card": "#1a1d20",
+      "--ink": "#edebe6",
+      "--mid": "#c9c6bd",
+      "--muted": "#8e8b83",
       "--surface": "rgba(255,255,255,.055)",
       "--surface2": "rgba(255,255,255,.1)",
       "--border": "rgba(255,255,255,.09)",
-      "--accent": "#00cfff",
-      "--code": "#0c1116",
+      "--accent": "#3ddc84",
+      "--code": "#0c0f0e",
     },
     light: {
-      "--bg": "#f2f5f7",
+      "--bg": "#fafaf7",
       "--panel": "#ffffff",
       "--card": "#ffffff",
-      "--ink": "#10151a",
-      "--mid": "#2b333b",
-      "--muted": "#5b6672",
-      "--surface": "rgba(16,24,32,.05)",
+      "--ink": "#131518",
+      "--mid": "#2e2b26",
+      "--muted": "#6f6a5f",
+      "--surface": "rgba(19,21,24,.05)",
       "--surface2": "#ffffff",
-      "--border": "rgba(16,24,32,.1)",
-      "--accent": "#008cb4",
-      "--code": "#101820",
+      "--border": "rgba(19,21,24,.12)",
+      "--accent": "#0b6e4f",
+      "--code": "#101613",
     },
   },
   {
     id: "senja",
-    name: "B · Senja Botjawir",
-    desc: "Plum ekspresif + aksen koral, kartu stiker, mesh senja. Paling berani.",
+    name: "Senja",
+    desc: "Plum ekspresif + aksen koral. Alternatif paling berani.",
     dots: ["#140f1c", "#ff8a5c", "#7c5cff"],
     defaultMode: "dark",
     rows: false,
@@ -123,49 +124,49 @@ export const PRESETS: PresetDef[] = [
   },
   {
     id: "kertas",
-    name: "C · Kertas Fokus",
-    desc: "Terang dulu, pesan AI model baris (tanpa bubble), hirarki tipografi. Paling tenang & terbaca.",
-    dots: ["#f6f4ee", "#0e7c5b", "#181510"],
+    name: "Kertas Ink",
+    desc: "Kertas terang premium, pesan AI model baris (tanpa bubble). Paling terbaca.",
+    dots: ["#fafaf7", "#0b6e4f", "#131518"],
     defaultMode: "light",
     rows: true,
     dark: {
-      "--bg": "#101210",
-      "--panel": "#151714",
-      "--card": "#1b1e1a",
-      "--ink": "#f0efe8",
-      "--mid": "#cfccc0",
-      "--muted": "#a3a097",
+      "--bg": "#0e0f11",
+      "--panel": "#141619",
+      "--card": "#1a1d20",
+      "--ink": "#edebe6",
+      "--mid": "#c9c6bd",
+      "--muted": "#8e8b83",
       "--surface": "rgba(255,255,255,.055)",
       "--surface2": "rgba(255,255,255,.1)",
       "--border": "rgba(255,255,255,.09)",
-      "--accent": "#3dd598",
-      "--code": "#0e120e",
+      "--accent": "#3ddc84",
+      "--code": "#0c0f0e",
     },
     light: {
-      "--bg": "#f6f4ee",
+      "--bg": "#fafaf7",
       "--panel": "#ffffff",
       "--card": "#ffffff",
-      "--ink": "#181510",
-      "--mid": "#33302a",
-      "--muted": "#6b655a",
-      "--surface": "rgba(24,21,16,.045)",
+      "--ink": "#131518",
+      "--mid": "#2e2b26",
+      "--muted": "#6f6a5f",
+      "--surface": "rgba(19,21,24,.05)",
       "--surface2": "#ffffff",
-      "--border": "rgba(24,21,16,.12)",
-      "--accent": "#0e7c5b",
+      "--border": "rgba(19,21,24,.12)",
+      "--accent": "#0b6e4f",
       "--code": "#101613",
     },
   },
 ];
 
 export const SWATCHES = [
-  "#00cfff",
+  "#3ddc84",
+  "#0b6e4f",
   "#7c5cff",
   "#3b82f6",
   "#22c55e",
   "#ffb020",
   "#ff8a5c",
   "#f472b6",
-  "#e5e7eb",
 ];
 
 export const FONT_SIZES: { id: FontSizeId; label: string; px: string }[] = [
@@ -175,9 +176,9 @@ export const FONT_SIZES: { id: FontSizeId; label: string; px: string }[] = [
 ];
 
 export const RADII: { id: RadiusId; label: string; px: string }[] = [
-  { id: "sharp", label: "▢ Lancip", px: "9px" },
-  { id: "medium", label: "▤ Sedang", px: "14px" },
-  { id: "round", label: "⬤ Bulat", px: "20px" },
+  { id: "sharp", label: "Lancip", px: "9px" },
+  { id: "medium", label: "Sedang", px: "14px" },
+  { id: "round", label: "Bulat", px: "20px" },
 ];
 
 export const DENSITIES: { id: DensityId; label: string }[] = [
@@ -192,7 +193,7 @@ export function getPreset(id: ThemePresetId): PresetDef {
 export const DEFAULT_APPEARANCE: AppearanceSettings = {
   preset: "komando",
   mode: "dark",
-  accent: "#00cfff",
+  accent: "#3ddc84",
   fontSize: "M",
   radius: "medium",
   density: "comfortable",
@@ -290,5 +291,5 @@ export function applyAppearance(a: AppearanceSettings): void {
  * string di sini agar layout.tsx dan test memakai sumber yang sama.
  */
 export function themeInitScript(): string {
-  return `(function(){try{var t=null;try{t=JSON.parse(localStorage.getItem("cbw.theme.v1")||"null")}catch(e){}var s=null;try{s=JSON.parse(localStorage.getItem("cbw.settings.v1")||"null")}catch(e){}var p=(t&&["komando","senja","kertas"].indexOf(t.preset)>-1)?t.preset:"komando";var m=(t&&(t.mode==="light"||t.mode==="dark"))?t.mode:((s&&s.theme==="light")?"light":"dark");var ax=(t&&/^#[0-9a-fA-F]{6}$/.test(t.accent||""))?t.accent.toLowerCase():(p==="senja"?(m==="light"?"#e05b2b":"#ff8a5c"):p==="kertas"?(m==="light"?"#0e7c5b":"#3dd598"):(m==="light"?"#008cb4":"#00cfff"));var fs=(t&&t.fontSize==="S")?"13.5px":(t&&t.fontSize==="L")?"16px":"14.5px";var rr=(t&&t.radius==="sharp")?"9px":(t&&t.radius==="round")?"20px":"14px";var h=document.documentElement;h.classList.add("preset-"+p);if(m==="light")h.classList.add("light");if(t&&t.density==="compact")h.classList.add("density-compact");function lum(x){var r=parseInt(x.slice(1,3),16)/255,g=parseInt(x.slice(3,5),16)/255,b=parseInt(x.slice(5,7),16)/255;function f(c){return c<=0.03928?c/12.92:Math.pow((c+0.055)/1.055,2.4)}return 0.2126*f(r)+0.7152*f(g)+0.0722*f(b)}h.style.setProperty("--accent",ax);h.style.setProperty("--accent-soft",ax+"1f");h.style.setProperty("--accent-glow",ax+"40");h.style.setProperty("--accent-ink",lum(ax)>0.45?"#08222c":"#ffffff");h.style.setProperty("--fs",fs);h.style.setProperty("--r",rr)}catch(e){}})();`;
+  return `(function(){try{var t=null;try{t=JSON.parse(localStorage.getItem("cbw.theme.v1")||"null")}catch(e){}var s=null;try{s=JSON.parse(localStorage.getItem("cbw.settings.v1")||"null")}catch(e){}var p=(t&&["komando","senja","kertas"].indexOf(t.preset)>-1)?t.preset:"komando";var m=(t&&(t.mode==="light"||t.mode==="dark"))?t.mode:((s&&s.theme==="light")?"light":"dark");var ax=(t&&/^#[0-9a-fA-F]{6}$/.test(t.accent||""))?t.accent.toLowerCase():(p==="senja"?(m==="light"?"#e05b2b":"#ff8a5c"):(m==="light"?"#0b6e4f":"#3ddc84"));var fs=(t&&t.fontSize==="S")?"13.5px":(t&&t.fontSize==="L")?"16px":"14.5px";var rr=(t&&t.radius==="sharp")?"9px":(t&&t.radius==="round")?"20px":"14px";var h=document.documentElement;h.classList.add("preset-"+p);if(m==="light")h.classList.add("light");if(t&&t.density==="compact")h.classList.add("density-compact");function lum(x){var r=parseInt(x.slice(1,3),16)/255,g=parseInt(x.slice(3,5),16)/255,b=parseInt(x.slice(5,7),16)/255;function f(c){return c<=0.03928?c/12.92:Math.pow((c+0.055)/1.055,2.4)}return 0.2126*f(r)+0.7152*f(g)+0.0722*f(b)}h.style.setProperty("--accent",ax);h.style.setProperty("--accent-soft",ax+"1f");h.style.setProperty("--accent-glow",ax+"40");h.style.setProperty("--accent-ink",lum(ax)>0.45?"#08222c":"#ffffff");h.style.setProperty("--fs",fs);h.style.setProperty("--r",rr)}catch(e){}})();`;
 }

@@ -1,42 +1,38 @@
 @import "tailwindcss";
 
 /* ─────────────────────────────────────────────
-   Design tokens — redesign-v2 (3 preset di atas
-   bahasa yang sama: panel + orb + mono).
-   - komando: command-deck gelap, orb konik (default)
-   - senja:   plum ekspresif + aksen koral
-   - kertas:  terang, pesan AI model baris (rows)
-   Mode terang via class "light" di <html> bareng
-   class preset (anti-flicker di layout.tsx).
+   Design tokens — simple flat (tanpa dekorasi:
+   tanpa glow radial, tanpa gradient konik, tanpa
+   shine/shadow/lift). Fitur tema tetap: 3 preset
+   × dark/light via class di <html> (anti-flicker
+   di layout.tsx).
    Display tetap Poppins, kode JetBrains Mono.
+   Ikon: SVG custom di components/icons.tsx
+   (garis tipis 1.8px, currentColor, tanpa emoji).
    ───────────────────────────────────────────── */
 :root {
-  /* ── Accent (default = komando dark; applyAppearance /
+  /* ── Accent (default = Malam Ink; applyAppearance /
        themeInitScript menimpa secara inline) ── */
-  --accent: #00cfff;
-  --accent-soft: rgba(0, 207, 255, 0.12);
-  --accent-glow: rgba(0, 207, 255, 0.25);
+  --accent: #3ddc84;
+  --accent-soft: rgba(61, 220, 132, 0.12);
+  --accent-glow: rgba(61, 220, 132, 0.25);
   --accent-ink: #08222c;
 
   /* ── Skala dari panel Tampilan ── */
   --fs: 14.5px;
   --r: 14px;
 
-  /* ── Gradient text ── */
-  --gradient-a: var(--accent);
-  --gradient-b: #7c5cff;
-
-  /* ── komando dark (default) ── */
-  --bg: #0b0e12;
-  --panel: #0e1319;
-  --card: #141b24;
-  --ink: #f2f6f9;
-  --mid: #c9d2db;
-  --muted: #9aa6b2;
+  /* ── Malam Ink dark (default) ── */
+  --bg: #0e0f11;
+  --panel: #141619;
+  --card: #1a1d20;
+  --ink: #edebe6;
+  --mid: #c9c6bd;
+  --muted: #8e8b83;
   --surface: rgba(255, 255, 255, 0.055);
   --surface2: rgba(255, 255, 255, 0.1);
   --border: rgba(255, 255, 255, 0.09);
-  --code: #0c1116;
+  --code: #0c0f0e;
 
   /* ── Aliases mengikuti aksen (custom accent ikut) ── */
   --accent-hover: color-mix(in srgb, var(--accent) 15%, transparent);
@@ -71,17 +67,17 @@
 
 /* ── Preset: nilai dark (default tiap preset) ── */
 .preset-komando {
-  --bg: #0b0e12;
-  --panel: #0e1319;
-  --card: #141b24;
-  --ink: #f2f6f9;
-  --mid: #c9d2db;
-  --muted: #9aa6b2;
+  --bg: #0e0f11;
+  --panel: #141619;
+  --card: #1a1d20;
+  --ink: #edebe6;
+  --mid: #c9c6bd;
+  --muted: #8e8b83;
   --surface: rgba(255, 255, 255, 0.055);
   --surface2: rgba(255, 255, 255, 0.1);
   --border: rgba(255, 255, 255, 0.09);
-  --accent: #00cfff;
-  --code: #0c1116;
+  --accent: #3ddc84;
+  --code: #0c0f0e;
 }
 .preset-senja {
   --bg: #140f1c;
@@ -97,32 +93,32 @@
   --code: #1c1226;
 }
 .preset-kertas {
-  --bg: #101210;
-  --panel: #151714;
-  --card: #1b1e1a;
-  --ink: #f0efe8;
-  --mid: #cfccc0;
-  --muted: #a3a097;
+  --bg: #0e0f11;
+  --panel: #141619;
+  --card: #1a1d20;
+  --ink: #edebe6;
+  --mid: #c9c6bd;
+  --muted: #8e8b83;
   --surface: rgba(255, 255, 255, 0.055);
   --surface2: rgba(255, 255, 255, 0.1);
   --border: rgba(255, 255, 255, 0.09);
-  --accent: #3dd598;
-  --code: #0e120e;
+  --accent: #3ddc84;
+  --code: #0c0f0e;
 }
 
 /* ── Preset: nilai light (class "light" di <html>) ── */
 .preset-komando.light {
-  --bg: #f2f5f7;
+  --bg: #fafaf7;
   --panel: #ffffff;
   --card: #ffffff;
-  --ink: #10151a;
-  --mid: #2b333b;
-  --muted: #5b6672;
-  --surface: rgba(16, 24, 32, 0.05);
+  --ink: #131518;
+  --mid: #2e2b26;
+  --muted: #6f6a5f;
+  --surface: rgba(19, 21, 24, 0.05);
   --surface2: #ffffff;
-  --border: rgba(16, 24, 32, 0.1);
-  --accent: #008cb4;
-  --code: #101820;
+  --border: rgba(19, 21, 24, 0.12);
+  --accent: #0b6e4f;
+  --code: #101613;
   --badge-bg: rgba(255, 255, 255, 0.85);
 }
 .preset-senja.light {
@@ -140,16 +136,16 @@
   --badge-bg: rgba(255, 255, 255, 0.85);
 }
 .preset-kertas.light {
-  --bg: #f6f4ee;
+  --bg: #fafaf7;
   --panel: #ffffff;
   --card: #ffffff;
-  --ink: #181510;
-  --mid: #33302a;
-  --muted: #6b655a;
-  --surface: rgba(24, 21, 16, 0.045);
+  --ink: #131518;
+  --mid: #2e2b26;
+  --muted: #6f6a5f;
+  --surface: rgba(19, 21, 24, 0.05);
   --surface2: #ffffff;
-  --border: rgba(24, 21, 16, 0.12);
-  --accent: #0e7c5b;
+  --border: rgba(19, 21, 24, 0.12);
+  --accent: #0b6e4f;
   --code: #101613;
   --badge-bg: rgba(255, 255, 255, 0.85);
 }
@@ -202,141 +198,47 @@ body {
   outline-offset: 2px;
 }
 
-/* ── Atmosfer: glow radial di belakang konten (ala mockup) ── */
-.app-atmos {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(480px 300px at 88% -60px, var(--accent-glow), transparent 65%),
-    radial-gradient(560px 380px at -80px 110%, rgba(124, 92, 255, 0.16), transparent 60%);
-}
-
-/* ── Orb: badge brand + avatar AI (conic gradient) ── */
-.orb {
+/* ── Logo RuangTanya: kotak tinta + glyph terang (premium, 1 aksen) ── */
+.logo-mark {
   width: 38px;
   height: 38px;
-  border-radius: 12px;
+  border-radius: 10px;
   flex-shrink: 0;
-  background: conic-gradient(from 210deg, var(--accent), #7c5cff, var(--accent));
+  background: var(--ink);
+  border: 1px solid var(--ink);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
-  font-weight: 700;
-  font-size: 17px;
+  color: var(--bg);
 }
-.orb-lg {
-  width: 64px;
-  height: 64px;
-  border-radius: 20px;
-  font-size: 30px;
-  box-shadow: 0 14px 34px var(--accent-glow);
+.logo-mark-lg {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
 }
 .avatar-ai {
   width: 30px;
   height: 30px;
-  border-radius: 50%;
+  border-radius: 8px;
   flex-shrink: 0;
   margin-top: 2px;
-  background: conic-gradient(from 210deg, var(--accent), #7c5cff, var(--accent));
+  background: var(--ink);
+  border: 1px solid var(--ink);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #fff;
-  font-size: 14px;
-  font-weight: 700;
-}
-html.preset-kertas .avatar-ai {
-  border-radius: 10px;
+  color: var(--bg);
 }
 
-/* ── Glass / surface cards ── */
+/* ── Surface cards flat (tanpa blur/shadow/lift) ── */
 .glass {
   background: var(--surface);
   border: 1px solid var(--surface-border);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-}
-.glass-hover {
-  transition: all 0.25s ease;
-}
-.glass-hover:hover {
-  background: var(--surface-hover);
-  border-color: var(--border-accent);
-  transform: translateY(-3px);
-  box-shadow: 0 12px 36px var(--accent-glow);
 }
 
-/* ── Logo badge (lama, dipertahankan untuk kompat) ── */
-.logo-badge {
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--bg-white);
+/* ── Judul aksen flat (tanpa animasi gradient) ── */
+.text-accent {
   color: var(--accent);
-  border: 1px solid var(--border-accent);
-  font-weight: 900;
-  font-size: 1.05rem;
-}
-
-/* ── Animated gradient heading ── */
-.text-gradient-animated {
-  background: linear-gradient(
-    90deg,
-    var(--gradient-a) 0%,
-    var(--gradient-b) 25%,
-    var(--gradient-a) 50%,
-    var(--gradient-b) 75%,
-    var(--gradient-a) 100%
-  );
-  background-size: 200% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: gradient-slide 7s linear infinite;
-}
-@keyframes gradient-slide {
-  to {
-    background-position: -200% 0;
-  }
-}
-
-/* ── Tombol shine ── */
-.btn-shine {
-  position: relative;
-  overflow: hidden;
-}
-.btn-shine::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -75%;
-  width: 50%;
-  height: 100%;
-  transform: skewX(-20deg);
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.4),
-    transparent
-  );
-  animation: btn-shine-sweep 3.4s ease-in-out infinite;
-}
-@keyframes btn-shine-sweep {
-  0% {
-    left: -75%;
-  }
-  55% {
-    left: 125%;
-  }
-  100% {
-    left: 125%;
-  }
 }
 
 /* ── Animasi titik mengetik ── */
@@ -406,7 +308,7 @@ html.preset-kertas .avatar-ai {
   background: var(--surface2);
 }
 
-/* ── Blok kode dengan header (traffic dots + tombol salin) ── */
+/* ── Blok kode dengan header (label bahasa + tombol salin) ── */
 .codeblock {
   background: var(--code);
   border: 1px solid var(--border);
@@ -420,16 +322,6 @@ html.preset-kertas .avatar-ai {
   gap: 8px;
   padding: 8px 12px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.09);
-}
-.codeblock .tdots {
-  display: flex;
-  gap: 5px;
-}
-.codeblock .tdots i {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  display: block;
 }
 .codeblock header span.fname {
   font: 500 11px var(--font-jetbrains-mono), ui-monospace, monospace;
@@ -528,13 +420,13 @@ html.preset-kertas .bub-ai {
   padding: 0.35rem 0.6rem;
 }
 
-/* ── Panel composer (ala mockup) ── */
+/* ── Panel composer (flat premium, tanpa shadow) ── */
 .chat-panel {
   border: 1px solid var(--border);
   background: var(--surface);
   border-radius: calc(var(--r) + 4px);
   padding: 6px 10px 10px;
-  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.18);
+  box-shadow: none;
 }
 .chat-panel:focus-within {
   border-color: var(--accent);
@@ -544,16 +436,6 @@ html.preset-kertas .bub-ai {
   background: var(--border);
   margin: 0 2px 8px;
 }
-.bdg {
-  font-size: 10.5px;
-  background: var(--accent-soft);
-  color: var(--accent);
-  border-radius: 6px;
-  padding: 1px 6px;
-  font-weight: 700;
-  white-space: nowrap;
-}
-
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

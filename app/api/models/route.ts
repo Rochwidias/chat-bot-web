@@ -84,7 +84,7 @@ export async function GET(req: NextRequest) {
   // Referer/title OpenRouter bisa dioverride via env saat deploy
   // (default localhost agar dev tetap jalan tanpa env).
   const appReferer = process.env.OPENROUTER_REFERER || "http://localhost:3000";
-  const appTitle = process.env.OPENROUTER_TITLE || "ChatBot Web BYOK";
+  const appTitle = process.env.OPENROUTER_TITLE || "RuangTanya BYOK";
 
   const headers: Record<string, string> = {};
   if (apiKey) headers.Authorization = `Bearer ${apiKey}`;

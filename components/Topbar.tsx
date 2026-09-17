@@ -4,6 +4,15 @@ import { useState } from "react";
 import { PROVIDERS } from "@/lib/providers";
 import { useDismissible } from "@/lib/useDismissible";
 import type { ProviderId } from "@/lib/types";
+import {
+  CheckIcon,
+  ChevronDownIcon,
+  KeyIcon,
+  MenuIcon,
+  MoonIcon,
+  SettingsIcon,
+  SunIcon,
+} from "./icons";
 
 interface Props {
   provider: ProviderId;
@@ -34,13 +43,9 @@ export default function Topbar(props: Props) {
           title="Menu riwayat"
           aria-label="Menu riwayat"
         >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <line x1="3" y1="6" x2="21" y2="6" />
-            <line x1="3" y1="12" x2="21" y2="12" />
-            <line x1="3" y1="18" x2="21" y2="18" />
-          </svg>
+          <MenuIcon size={20} />
         </button>
-        {/* Breadcrumb ala mockup */}
+        {/* Breadcrumb */}
         <p className="truncate text-[13px] text-[var(--muted)]">
           Ruang Obrolan <span className="mx-0.5">/</span>{" "}
           <b className="font-semibold text-[var(--ink)]">{props.chatTitle ?? "Chat baru"}</b>
@@ -58,15 +63,7 @@ export default function Topbar(props: Props) {
             className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2.5 py-1.5 text-xs font-semibold text-[var(--mid)] outline-none transition-colors hover:border-[var(--accent)] hover:text-[var(--ink)]"
           >
             <span>{current.label}</span>
-            <svg
-              className={`h-3.5 w-3.5 transition-transform ${dropOpen ? "rotate-180" : ""}`}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <polyline points="6 9 12 15 18 9" />
-            </svg>
+            <ChevronDownIcon size={14} />
           </button>
           {dropOpen && (
             <div className="absolute right-0 top-full z-50 mt-1 w-56 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--bg)] p-1 shadow-2xl">
@@ -80,14 +77,14 @@ export default function Topbar(props: Props) {
                       setDropOpen(false);
                     }}
                     title={p.keyHint}
-                    className={`w-full cursor-pointer rounded-lg px-3 py-2 text-left text-xs transition-colors ${
+                    className={`flex w-full cursor-pointer items-center gap-1.5 rounded-lg px-3 py-2 text-left text-xs transition-colors ${
                       selected
                         ? "bg-[var(--accent-soft)] font-bold text-[var(--accent)]"
                         : "text-[var(--ink)] hover:bg-[var(--surface)]"
                     }`}
                   >
-                    {p.label}
-                    {selected && " ✓"}
+                    <span className="flex-1">{p.label}</span>
+                    {selected && <CheckIcon size={14} />}
                   </button>
                 );
               })}
@@ -97,30 +94,31 @@ export default function Topbar(props: Props) {
 
         <button
           onClick={props.onOpenKeys}
-          className={`rounded-lg border px-2.5 py-1.5 text-xs font-bold transition ${
+          className={`inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2.5 py-1.5 text-xs font-bold outline-none transition-colors ${
             props.hasKey
-              ? "border-emerald-400/30 bg-emerald-500/10 text-emerald-300"
-              : "border-yellow-400/30 bg-yellow-500/10 text-yellow-200 hover:opacity-90"
-          } cursor-pointer`}
+              ? "text-[var(--mid)]"
+              : "text-[var(--accent)]"
+          } hover:border-[var(--accent)] hover:text-[var(--ink)]`}
           title="Atur API key"
         >
-          {props.hasKey ? "🟢 Key OK" : "🔑 Isi API Key"}
+          <KeyIcon size={13} />
+          {props.hasKey ? "Key OK" : "Isi API Key"}
         </button>
         <button
           onClick={props.onOpenSettings}
-          className="cursor-pointer rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2.5 py-1.5 text-xs text-[var(--muted)] transition-colors hover:border-[var(--accent)] hover:text-[var(--ink)]"
+          className="cursor-pointer rounded-lg border border-[var(--border)] bg-[var(--surface)] p-2 text-[var(--muted)] transition-colors hover:border-[var(--accent)] hover:text-[var(--ink)]"
           title="Pengaturan tampilan"
           aria-label="Pengaturan tampilan"
         >
-          ⚙️
+          <SettingsIcon size={15} />
         </button>
         <button
           onClick={props.onToggleTheme}
-          className="cursor-pointer rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2.5 py-1.5 text-xs text-[var(--muted)] transition-colors hover:border-[var(--accent)] hover:text-[var(--ink)]"
+          className="cursor-pointer rounded-lg border border-[var(--border)] bg-[var(--surface)] p-2 text-[var(--muted)] transition-colors hover:border-[var(--accent)] hover:text-[var(--ink)]"
           title="Ganti gelap / terang"
           aria-label="Ganti tema"
         >
-          {props.theme === "dark" ? "☀️" : "🌙"}
+          {props.theme === "dark" ? <SunIcon size={15} /> : <MoonIcon size={15} />}
         </button>
       </div>
 
