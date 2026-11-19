@@ -1,0 +1,72 @@
+- generic [ref=e2]:
+  - complementary [ref=e3]:
+    - generic [ref=e4]:
+      - generic [ref=e10]:
+        - paragraph [ref=e11]: RuangTanya
+        - paragraph [ref=e12]: BYOK Chat
+      - generic [ref=e13]:
+        - generic [ref=e14]:
+          - generic [ref=e16]: OpenAI
+          - generic [ref=e17]: v1
+        - paragraph [ref=e18]: gpt-4o-mini
+        - generic [ref=e19]:
+          - generic [ref=e20]: Isi Key
+          - generic [ref=e23]: 4 model
+      - button "Chat Baru" [ref=e24]
+    - generic [ref=e26]:
+      - paragraph [ref=e27]: Riwayat (0)
+      - paragraph [ref=e28]: Belum ada riwayat.Klik Chat Baru untuk mulai.
+      - list
+    - generic [ref=e29]:
+      - paragraph [ref=e30]: Total token
+      - paragraph [ref=e31]: 0 tok
+      - img "Belum ada data token" [ref=e32]
+      - paragraph [ref=e34]: Mulai chat untuk melihat akumulasi
+    - generic [ref=e35]: Key tersimpan di browser saja. Tidak dikirim ke server lain selain provider.
+  - generic [ref=e40]:
+    - banner [ref=e41]:
+      - paragraph [ref=e43]: Ruang Obrolan / Chat baru
+      - generic [ref=e44]:
+        - button "OpenAI" [ref=e46] [cursor=pointer]
+        - button "Isi API Key" [ref=e50] [cursor=pointer]
+        - button "Pengaturan tampilan" [ref=e53] [cursor=pointer]
+        - button "Ganti tema" [ref=e55] [cursor=pointer]
+    - main [ref=e62]:
+      - generic [ref=e64]:
+        - heading "Mulai ngobrol dengan AI" [level=2] [ref=e69]
+        - paragraph [ref=e70]: Pilih provider + model di bawah, isi API key sendiri, atur reasoning Fast / Medium / High, upload gambar, lalu kirim pesan!
+        - generic [ref=e71]:
+          - button "Jelaskan konsep mis. 'Jelaskan API dengan simpel'" [ref=e72] [cursor=pointer]:
+            - generic [ref=e76]:
+              - generic [ref=e77]: Jelaskan konsep
+              - text: mis. 'Jelaskan API dengan simpel'
+          - button "Bantu coding mis. 'Buatkan fetch streaming di JS'" [ref=e78] [cursor=pointer]:
+            - generic [ref=e83]:
+              - generic [ref=e84]: Bantu coding
+              - text: mis. 'Buatkan fetch streaming di JS'
+          - button "Analisa gambar upload gambar + tanya isinya" [ref=e85] [cursor=pointer]:
+            - generic [ref=e91]:
+              - generic [ref=e92]: Analisa gambar
+              - text: upload gambar + tanya isinya
+          - button "High reasoning ubah ke High untuk soal sulit" [ref=e93] [cursor=pointer]:
+            - generic [ref=e98]:
+              - generic [ref=e99]: High reasoning
+              - text: ubah ke High untuk soal sulit
+    - generic [ref=e101]:
+      - generic [ref=e102]:
+        - generic [ref=e103]:
+          - button "GPT-4o Mini (cepat & murah) vision" [ref=e105] [cursor=pointer]:
+            - generic [ref=e106]: GPT-4o Mini (cepat & murah)
+            - generic "Support gambar" [ref=e108]: vision
+          - button "4" [ref=e115] [cursor=pointer]
+        - group "Level reasoning" [ref=e122]:
+          - button "Fast" [ref=e123] [cursor=pointer]
+          - button "Medium" [pressed] [ref=e126] [cursor=pointer]
+          - button "High" [ref=e129] [cursor=pointer]
+        - generic [ref=e135]:
+          - button "Upload gambar" [ref=e136] [cursor=pointer]
+          - textbox "Ketik pesan… (Enter kirim, Shift+Enter baris baru)" [ref=e139]
+          - button "Kirim pesan" [disabled] [ref=e140]
+      - generic [ref=e143]:
+        - generic [ref=e144]: BYOK · key di browser saja
+        - generic [ref=e145]: 0 / 4000

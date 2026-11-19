@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="id" class="preset-komando">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RuangTanya — Mockup Token Global di Pengaturan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --accent:#3ddc84; --accent-soft:rgba(61,220,132,.12); --accent-ring:rgba(61,220,132,.32); --accent-ink:#08222c;
+    --fs:14.5px; --r:14px;
+    --bg:#0e0f11; --panel:#141619; --card:#1a1d20; --ink:#edebe6; --mid:#c9c6bd; --muted:#8e8b83;
+    --surface:rgba(255,255,255,.055); --surface2:rgba(255,255,255,.10); --border:rgba(255,255,255,.09);
+    --code:#0c0f0e; --danger:#f87171;
+  }
+  html.preset-komando.light{
+    --bg:#fafaf7; --panel:#ffffff; --card:#ffffff; --ink:#131518; --mid:#2e2b26; --muted:#6f6a5f;
+    --surface:rgba(19,21,24,.05); --surface2:#ffffff; --border:rgba(19,21,24,.12);
+    --accent:#0b6e4f; --accent-soft:rgba(11,110,79,.10); --accent-ring:rgba(11,110,79,.22); --accent-ink:#ffffff;
+    --code:#101613;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:Poppins,system-ui,sans-serif; font-size:var(--fs); line-height:1.6;
+    -webkit-font-smoothing:antialiased; min-height:100dvh;
+  }
+  button{font-family:inherit}
+  :focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:8px}
+  ::selection{background:var(--accent-ring)}
+
+  .page{min-height:100dvh; display:flex; flex-direction:column; align-items:center; padding:28px 16px 48px; gap:20px}
+  .page-head{max-width:576px; width:100%; display:flex; align-items:center; gap:10px}
+  .page-head h1{margin:0; font-size:15px; font-weight:700}
+  .page-head p{margin:2px 0 0; font-size:12px; color:var(--muted)}
+  .theme-toggle{margin-left:auto; display:flex; border:1px solid var(--border); border-radius:99px; padding:3px; gap:2px; background:var(--panel)}
+  .theme-toggle button{border:0; background:transparent; color:var(--muted); font-size:12px; font-weight:600; padding:6px 14px; border-radius:99px; cursor:pointer}
+  .theme-toggle button[aria-pressed="true"]{background:var(--ink); color:var(--bg)}
+
+  /* ---------- Modal (mirror AppearanceModal) ---------- */
+  .overlay{
+    width:100%; max-width:576px; border-radius:20px; border:1px solid var(--border);
+    background:var(--bg); padding:20px; box-shadow:0 24px 70px rgba(0,0,0,.5);
+  }
+  .modal-top{display:flex; align-items:center; justify-content:space-between; margin-bottom:2px}
+  .modal-top h2{margin:0; font-size:16px; font-weight:700; display:flex; align-items:center; gap:8px}
+  .modal-top h2 svg{flex-shrink:0}
+  .x-btn{border:0; background:transparent; color:var(--muted); border-radius:8px; padding:6px; cursor:pointer; font-size:14px; line-height:1}
+  .x-btn:hover{background:var(--surface); color:var(--ink)}
+  .modal-sub{margin:0 0 16px; font-size:12px; color:var(--muted)}
+
+  .sec-label{font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); margin:0 0 8px}
+  .preset-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:16px}
+  .preset-card{
+    border:1.5px solid var(--border); background:var(--surface); border-radius:14px; padding:10px;
+    text-align:left; cursor:pointer; color:var(--ink);
+  }
+  .preset-card.active{border-color:var(--accent); background:transparent}
+  .preset-card .dots{display:flex; gap:4px; margin-bottom:8px}
+  .preset-card .dots i{width:14px; height:14px; border-radius:99px; display:block; border:1px solid rgba(0,0,0,.25)}
+  .preset-card b{display:block; font-size:12.5px}
+  .preset-card span{font-size:11px; color:var(--muted); line-height:1.5; display:block}
+  .seg-row{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px}
+  .seg{display:flex; flex-wrap:wrap; gap:6px}
+  .seg button{
+    border:1px solid var(--border); background:transparent; color:var(--ink);
+    border-radius:99px; padding:7px 14px; font-size:12.5px; font-weight:600; cursor:pointer;
+  }
+  .seg button[aria-pressed="true"]{background:var(--ink); border-color:var(--ink); color:var(--bg)}
+  .swatches{display:flex; flex-wrap:wrap; gap:7px; margin-bottom:16px}
+  .swatches i{width:28px; height:28px; border-radius:99px; display:block; border:1px solid rgba(0,0,0,.25)}
+  .swatches i.active{outline:2px solid var(--ink); outline-offset:2px}
+  .dot-ink{background:#0e0f11} .dot-acc{background:#3ddc84} .dot-paper{background:#edebe6}
+  .dot-night{background:#140f1c} .dot-dusk{background:#ff8a5c} .dot-cream{background:#f8f1e9}
+  .dot-white{background:#fafaf7} .dot-green{background:#0b6e4f} .dot-coal{background:#131518}
+  .sw-acc{background:#3ddc84} .sw-cyan{background:#22d3ee} .sw-violet{background:#a78bfa}
+  .sw-ember{background:#ff8a5c} .sw-pink{background:#f472b6}
+
+  /* ---------- Seksi baru: dashboard mini token ---------- */
+  .token-card{
+    border:1px solid var(--border); background:var(--surface); border-radius:var(--r);
+    padding:14px 16px; margin-bottom:6px;
+  }
+  .token-card .total{
+    font-family:"JetBrains Mono",monospace; font-size:26px; font-weight:700;
+    color:var(--accent); line-height:1.2; letter-spacing:-.01em;
+  }
+  .token-card .total small{font-size:13px; font-weight:500; color:var(--accent)}
+  .token-card .sub{margin:4px 0 12px; font-size:12px; color:var(--muted)}
+  .token-card .sub b{color:var(--mid); font-weight:600}
+  .tbar{display:flex; height:8px; border-radius:99px; overflow:hidden; background:var(--surface2); margin-bottom:12px}
+  .tbar .p{background:var(--accent); flex:795 1 0}
+  .tbar .c{background:color-mix(in srgb, var(--accent) 38%, var(--muted)); flex:205 1 0}
+  .tbar.empty span{flex:1; background:var(--border)}
+  .tstats{display:grid; grid-template-columns:repeat(3,1fr); gap:8px}
+  .tstat{
+    border:1px solid var(--border); border-radius:10px; padding:8px 10px; background:transparent;
+  }
+  .tstat .k{font-size:10px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted)}
+  .tstat .v{font-family:"JetBrains Mono",monospace; font-size:14.5px; font-weight:700; color:var(--ink); margin-top:2px}
+  .tstat .v em{font-style:normal; color:var(--accent)}
+  .token-note{margin:8px 0 16px; font-size:11.5px; line-height:1.65; color:var(--muted)}
+  .token-note code{font-family:"JetBrains Mono",monospace; font-size:11px; color:var(--mid)}
+
+  .btn-done{
+    width:100%; border:0; cursor:pointer; border-radius:12px; padding:10px 16px;
+    background:var(--accent); color:var(--accent-ink); font-weight:600; font-size:14px;
+  }
+  .btn-done:hover{filter:brightness(1.06)}
+
+  .caption{max-width:576px; width:100%; font-size:12px; color:var(--muted); line-height:1.7}
+  .caption b{color:var(--mid)}
+  .caption code{font-family:"JetBrains Mono",monospace; font-size:11.5px; color:var(--mid)}
+
+  .variant-label{max-width:576px; width:100%; margin:8px 0 -12px; font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--muted)}
+
+  @media (max-width:560px){
+    .preset-grid{grid-template-columns:1fr}
+    .seg-row{grid-template-columns:1fr}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation-duration:.01ms !important; transition-duration:.01ms !important}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="page-head">
+    <div>
+      <h1>Mockup — Token Global di Pengaturan</h1>
+      <p>Seksi baru di modal Pengaturan Tampilan, gaya ikut polish yang sudah approved.</p>
+    </div>
+    <div class="theme-toggle" role="group" aria-label="Pratinjau tema">
+      <button type="button" id="btn-dark" aria-pressed="true">Gelap</button>
+      <button type="button" id="btn-light" aria-pressed="false">Terang</button>
+    </div>
+  </div>
+
+  <!-- Varian 1: ada data -->
+  <p class="variant-label">Varian 1 — Ada riwayat (6 sesi · 48 pesan)</p>
+  <div class="overlay" role="dialog" aria-modal="true" aria-label="Pengaturan tampilan">
+    <div class="modal-top">
+      <h2>
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.6-2-3.4-2.4 1a7 7 0 0 0-2-1.2L14 3h-4l-.5 2.6a7 7 0 0 0-2 1.2l-2.4-1-2 3.4 2 1.6A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.6 2 3.4 2.4-1a7 7 0 0 0 2 1.2L10 21h4l.5-2.6a7 7 0 0 0 2-1.2l2.4 1 2-3.4-2-1.6c.07-.4.1-.8.1-1.2Z"/></svg>
+        Pengaturan Tampilan
+      </h2>
+      <button class="x-btn" type="button" aria-label="Tutup pengaturan">✕</button>
+    </div>
+    <p class="modal-sub">Setiap perubahan langsung diterapkan dan tersimpan di browser ini.</p>
+
+    <p class="sec-label">Preset desain</p>
+    <div class="preset-grid">
+      <button class="preset-card active" type="button">
+        <span class="dots" aria-hidden="true"><i class="dot-ink"></i><i class="dot-acc"></i><i class="dot-paper"></i></span>
+        <b>Malam Ink</b><span>Hijau terang di atas tinta gelap.</span>
+      </button>
+      <button class="preset-card" type="button">
+        <span class="dots" aria-hidden="true"><i class="dot-night"></i><i class="dot-dusk"></i><i class="dot-cream"></i></span>
+        <b>Senja</b><span>Oranye hangat di atas ungu malam.</span>
+      </button>
+      <button class="preset-card" type="button">
+        <span class="dots" aria-hidden="true"><i class="dot-white"></i><i class="dot-green"></i><i class="dot-coal"></i></span>
+        <b>Kertas</b><span>Kontras kertas terang, pesan tanpa bubble.</span>
+      </button>
+    </div>
+
+    <p class="sec-label">Warna aksen</p>
+    <div class="swatches" aria-hidden="true">
+      <i class="sw-acc active"></i><i class="sw-cyan"></i><i class="sw-violet"></i><i class="sw-ember"></i><i class="sw-pink"></i>
+    </div>
+
+    <div class="seg-row">
+      <div>
+        <p class="sec-label">Mode</p>
+        <div class="seg" role="group" aria-label="Mode">
+          <button type="button" aria-pressed="true">Gelap</button>
+          <button type="button" aria-pressed="false">Terang</button>
+        </div>
+      </div>
+      <div>
+        <p class="sec-label">Ukuran huruf</p>
+        <div class="seg" role="group" aria-label="Ukuran huruf">
+          <button type="button" aria-pressed="false">S</button>
+          <button type="button" aria-pressed="true">M</button>
+          <button type="button" aria-pressed="false">L</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ★ SEKSI BARU: dashboard mini ★ -->
+    <p class="sec-label">Penggunaan token</p>
+    <div class="token-card">
+      <div class="total">128,4k <small>tok</small></div>
+      <p class="sub"><b>6</b> sesi · <b>48</b> pesan · semua riwayat di browser ini</p>
+      <div class="tbar" role="img" aria-label="Perbandingan prompt 102,1k dan completion 26,3k token">
+        <span class="p"></span><span class="c"></span>
+      </div>
+      <div class="tstats">
+        <div class="tstat"><div class="k">↑ Prompt</div><div class="v">102,1k</div></div>
+        <div class="tstat"><div class="k">↓ Completion</div><div class="v">26,3k</div></div>
+        <div class="tstat"><div class="k">Rerata / sesi</div><div class="v"><em>21,4k</em></div></div>
+      </div>
+    </div>
+    <p class="token-note">Dihitung dari angka <code>usage</code> yang dikirim provider tiap jawaban. Provider yang tidak mengirim usage (mis. Ollama lokal) terbaca <code>0</code>.</p>
+
+    <button class="btn-done" type="button">Selesai</button>
+  </div>
+
+  <!-- Varian 2: kosong -->
+  <p class="variant-label">Varian 2 — Belum ada riwayat ber-token</p>
+  <div class="overlay" role="dialog" aria-modal="true" aria-label="Pengaturan tampilan (varian kosong)" aria-hidden="false">
+    <div class="modal-top">
+      <h2>
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.6-2-3.4-2.4 1a7 7 0 0 0-2-1.2L14 3h-4l-.5 2.6a7 7 0 0 0-2 1.2l-2.4-1-2 3.4 2 1.6A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.6 2 3.4 2.4-1a7 7 0 0 0 2 1.2L10 21h4l.5-2.6a7 7 0 0 0 2-1.2l2.4 1 2-3.4-2-1.6c.07-.4.1-.8.1-1.2Z"/></svg>
+        Pengaturan Tampilan
+      </h2>
+      <button class="x-btn" type="button" aria-label="Tutup pengaturan" tabindex="-1">✕</button>
+    </div>
+    <p class="modal-sub">Setiap perubahan langsung diterapkan dan tersimpan di browser ini.</p>
+
+    <p class="sec-label">Penggunaan token</p>
+    <div class="token-card">
+      <div class="total">0 <small>tok</small></div>
+      <p class="sub"><b>0</b> sesi ber-token · mulai chat untuk melihat akumulasi di sini</p>
+      <div class="tbar empty" role="img" aria-label="Belum ada data token"><span></span></div>
+      <div class="tstats">
+        <div class="tstat"><div class="k">↑ Prompt</div><div class="v">0</div></div>
+        <div class="tstat"><div class="k">↓ Completion</div><div class="v">0</div></div>
+        <div class="tstat"><div class="k">Rerata / sesi</div><div class="v"><em>0</em></div></div>
+      </div>
+    </div>
+    <p class="token-note">Dihitung dari angka <code>usage</code> yang dikirim provider tiap jawaban. Provider yang tidak mengirim usage (mis. Ollama lokal) terbaca <code>0</code>.</p>
+
+    <button class="btn-done" type="button" tabindex="-1">Selesai</button>
+  </div>
+
+  <div class="caption">
+    <b>Yang perlu abang nilai:</b> (1) bar proporsi prompt vs completion;
+    (2) 3 kotak stat — prompt, completion, rata-rata per sesi;
+    (3) catatan satu baris. Kalau oke, saya port ke <code>AppearanceModal.tsx</code> + agregat prompt/completion di <code>page.tsx</code>.
+  </div>
+</div>
+<script>
+  var root = document.documentElement;
+  var bd = document.getElementById('btn-dark');
+  var bl = document.getElementById('btn-light');
+  function setLight(on){
+    root.classList.toggle('light', on);
+    bd.setAttribute('aria-pressed', String(!on));
+    bl.setAttribute('aria-pressed', String(on));
+  }
+  bd.addEventListener('click', function(){ setLight(false); });
+  bl.addEventListener('click', function(){ setLight(true); });
+</script>
+</body>
+</html>

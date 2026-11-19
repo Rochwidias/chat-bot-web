@@ -1,0 +1,94 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - generic [ref=e4]:
+      - heading "Mockup — Token Global di Pengaturan" [level=1] [ref=e5]
+      - paragraph [ref=e6]: Seksi baru di modal Pengaturan Tampilan, gaya ikut polish yang sudah approved.
+    - group "Pratinjau tema" [ref=e7]:
+      - button "Gelap" [pressed] [ref=e8] [cursor=pointer]
+      - button "Terang" [ref=e9] [cursor=pointer]
+  - paragraph [ref=e10]: Varian 1 — Ada riwayat (6 sesi · 48 pesan)
+  - dialog "Pengaturan tampilan" [ref=e11]:
+    - generic [ref=e12]:
+      - heading "Pengaturan Tampilan" [level=2] [ref=e13]
+      - button "Tutup pengaturan" [ref=e17] [cursor=pointer]: ✕
+    - paragraph [ref=e18]: Setiap perubahan langsung diterapkan dan tersimpan di browser ini.
+    - paragraph [ref=e19]: Preset desain
+    - generic [ref=e20]:
+      - button "Malam Ink Hijau terang di atas tinta gelap." [ref=e21] [cursor=pointer]:
+        - generic [ref=e26]: Malam Ink
+        - generic [ref=e27]: Hijau terang di atas tinta gelap.
+      - button "Senja Oranye hangat di atas ungu malam." [ref=e28] [cursor=pointer]:
+        - generic [ref=e33]: Senja
+        - generic [ref=e34]: Oranye hangat di atas ungu malam.
+      - button "Kertas Kontras kertas terang, pesan tanpa bubble." [ref=e35] [cursor=pointer]:
+        - generic [ref=e40]: Kertas
+        - generic [ref=e41]: Kontras kertas terang, pesan tanpa bubble.
+    - paragraph [ref=e42]: Warna aksen
+    - generic [ref=e49]:
+      - generic [ref=e50]:
+        - paragraph [ref=e51]: Mode
+        - group "Mode" [ref=e52]:
+          - button "Gelap" [pressed] [ref=e53] [cursor=pointer]
+          - button "Terang" [ref=e54] [cursor=pointer]
+      - generic [ref=e55]:
+        - paragraph [ref=e56]: Ukuran huruf
+        - group "Ukuran huruf" [ref=e57]:
+          - button "S" [ref=e58] [cursor=pointer]
+          - button "M" [pressed] [ref=e59] [cursor=pointer]
+          - button "L" [ref=e60] [cursor=pointer]
+    - paragraph [ref=e61]: Penggunaan token
+    - generic [ref=e62]:
+      - generic [ref=e63]: 128,4k tok
+      - paragraph [ref=e64]: 6 sesi · 48 pesan · semua riwayat di browser ini
+      - img "Perbandingan prompt 102,1k dan completion 26,3k token" [ref=e65]
+      - generic [ref=e68]:
+        - generic [ref=e69]:
+          - generic [ref=e70]: ↑ Prompt
+          - generic [ref=e71]: 102,1k
+        - generic [ref=e72]:
+          - generic [ref=e73]: ↓ Completion
+          - generic [ref=e74]: 26,3k
+        - generic [ref=e75]:
+          - generic [ref=e76]: Rata² / sesi
+          - emphasis [ref=e78]: 21,4k
+    - paragraph [ref=e79]:
+      - text: Dihitung dari angka
+      - code [ref=e80]: usage
+      - text: yang dikirim provider tiap jawaban. Provider yang tidak mengirim usage (mis. Ollama lokal) terbaca
+      - code [ref=e81]: "0"
+      - text: .
+    - button "Selesai" [ref=e82] [cursor=pointer]
+  - paragraph [ref=e83]: Varian 2 — Belum ada riwayat ber-token
+  - dialog "Pengaturan tampilan (varian kosong)" [ref=e84]:
+    - generic [ref=e85]:
+      - heading "Pengaturan Tampilan" [level=2] [ref=e86]
+      - button "Tutup pengaturan" [ref=e90] [cursor=pointer]: ✕
+    - paragraph [ref=e91]: Setiap perubahan langsung diterapkan dan tersimpan di browser ini.
+    - paragraph [ref=e92]: Penggunaan token
+    - generic [ref=e93]:
+      - generic [ref=e94]: 0 tok
+      - paragraph [ref=e95]: 0 sesi ber-token · mulai chat untuk melihat akumulasi di sini
+      - img "Belum ada data token" [ref=e96]
+      - generic [ref=e98]:
+        - generic [ref=e99]:
+          - generic [ref=e100]: ↑ Prompt
+          - generic [ref=e101]: "0"
+        - generic [ref=e102]:
+          - generic [ref=e103]: ↓ Completion
+          - generic [ref=e104]: "0"
+        - generic [ref=e105]:
+          - generic [ref=e106]: Rata² / sesi
+          - emphasis [ref=e108]: "0"
+    - paragraph [ref=e109]:
+      - text: Dihitung dari angka
+      - code [ref=e110]: usage
+      - text: yang dikirim provider tiap jawaban. Provider yang tidak mengirim usage (mis. Ollama lokal) terbaca
+      - code [ref=e111]: "0"
+      - text: .
+    - button "Selesai" [ref=e112] [cursor=pointer]
+  - generic [ref=e113]:
+    - text: "Yang perlu abang nilai: (1) bar proporsi prompt vs completion; (2) 3 kotak stat — prompt, completion, rata-rata per sesi; (3) catatan satu baris. Kalau oke, saya port ke"
+    - code [ref=e114]: AppearanceModal.tsx
+    - text: + agregat prompt/completion di
+    - code [ref=e115]: page.tsx
+    - text: .
